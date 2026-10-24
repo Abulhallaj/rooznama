@@ -1,0 +1,30 @@
+name: Build Windows App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup WinApp CLI
+      uses: microsoft/setup-WinAppCli@v0.1
+
+    - name: Restore WinApp Dependencies
+      run: winapp restore
+
+    - name: Setup .NET (در صورت نیاز برای پروژههای .NET)
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' # نسخه .NET پروژه خود را وارد کنید
+
+    - name: Build the application
+      run: dotnet build --configuration Release --no-restore
+      # اگر پروژه شما از دستور build دیگری استفاده میکند، آن را جایگزین کنید

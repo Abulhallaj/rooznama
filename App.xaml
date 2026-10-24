@@ -1,0 +1,16 @@
+<Application
+    x:Class="Rooznama.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- default UI font: Vazirmatn (bundled in Assets/Fonts, or installed), then Segoe UI -->
+            <FontFamily x:Key="AppFontFamily">Vazirmatn, Segoe UI Variable, Segoe UI</FontFamily>
+            <FontFamily x:Key="ContentControlThemeFontFamily">Vazirmatn, Segoe UI Variable, Segoe UI</FontFamily>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

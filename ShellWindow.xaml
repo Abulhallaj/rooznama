@@ -1,0 +1,25 @@
+<Window
+    x:Class="Rooznama.ShellWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid x:Name="Root">
+        <!-- LeftCompact: the pane sits on the right in RTL (like the reference screenshot) -->
+        <NavigationView x:Name="Nav"
+                        PaneDisplayMode="LeftCompact"
+                        OpenPaneLength="200"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        SelectionChanged="Nav_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="NavCalendar" Icon="Calendar" Tag="calendar"/>
+                <NavigationViewItem x:Name="NavConverter" Icon="Sync" Tag="converter"/>
+            </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="NavSettings" Icon="Setting" Tag="settings"/>
+                <NavigationViewItem x:Name="NavAbout" Icon="Help" Tag="about"/>
+            </NavigationView.FooterMenuItems>
+            <Frame x:Name="ContentFrame"/>
+        </NavigationView>
+    </Grid>
+</Window>
