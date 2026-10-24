@@ -1,45 +1,59 @@
-name: build
+name: Build Windows App (Framework-dependent)
 
 on:
   push:
     branches: [main]
     tags: ['v*']
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write   # needed to attach the zip to a GitHub Release on tags
+  contents: write
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-dotnet@v4
+      - name: Setup WinApp CLI
+        uses: microsoft/setup-WinAppCli@v0.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      - name: Publish (portable, self-contained, win-x64)
+      - name: Restore dependencies
+        run: dotnet restore Rooznama.csproj
+
+      - name: Publish (framework-dependent, win-x64, only en/fa)
         run: >
           dotnet publish Rooznama.csproj -c Release -r win-x64
-          --self-contained -p:WindowsAppSDKSelfContained=true -o publish
+          --self-contained false
+          -p:WindowsAppSDKSelfContained=false
+          -p:SatelliteResourceLanguages=en;fa
+          -o publish
 
-      - name: Zip
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rooznama-fd-${{ github.ref_type == 'tag' && github.ref_name || 'dev' }}-win-x64
+          path: publish/
+
+      - name: Zip for release
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         run: |
-          $ver = if ($env:GITHUB_REF -like 'refs/tags/*') { $env:GITHUB_REF_NAME } else { 'dev' }
-          $name = "Rooznama-$ver-win-x64.zip"
+          $name = "Rooznama-$env:GITHUB_REF_NAME-win-x64-fd.zip"
           Compress-Archive -Path publish\* -DestinationPath $name
           "ZIP_NAME=$name" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.ZIP_NAME }}
-          path: ${{ env.ZIP_NAME }}
 
       - name: Attach to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true
