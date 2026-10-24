@@ -34,7 +34,7 @@ jobs:
           dotnet publish Rooznama.csproj -c Release -r win-x64
           --self-contained false
           -p:WindowsAppSDKSelfContained=false
-          -p:SatelliteResourceLanguages=en;fa
+          -p:SatelliteResourceLanguages="""en;fa"""
           -o publish
 
       - name: Upload artifact
