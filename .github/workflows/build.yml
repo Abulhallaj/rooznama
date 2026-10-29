@@ -1,4 +1,4 @@
-name: Build Windows App (Framework-dependent)
+name: build
 
 on:
   push:
@@ -9,51 +9,79 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write   # needed to attach files to a GitHub Release on tags
 
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, x86]   # each job produces: portable ZIP + installer (self-contained, no prerequisites)
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup WinApp CLI
-        uses: microsoft/setup-WinAppCli@v0.1
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore Rooznama.csproj
-
-      - name: Publish (framework-dependent, win-x64, only en/fa)
-        run: >
-          dotnet publish Rooznama.csproj -c Release -r win-x64
-          --self-contained false
-          -p:WindowsAppSDKSelfContained=false
-          -p:SatelliteResourceLanguages="""en;fa"""
-          -o publish
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Rooznama-fd-${{ github.ref_type == 'tag' && github.ref_name || 'dev' }}-win-x64
-          path: publish/
-
-      - name: Zip for release
-        if: startsWith(github.ref, 'refs/tags/v')
+      # The app version comes from the git tag (v0.6.0 -> 0.6.0), so it always matches the GitHub release.
+      - name: Compute version
         shell: pwsh
         run: |
-          $name = "Rooznama-$env:GITHUB_REF_NAME-win-x64-fd.zip"
-          Compress-Archive -Path publish\* -DestinationPath $name
-          "ZIP_NAME=$name" | Out-File -FilePath $env:GITHUB_ENV -Append
+          if ($env:GITHUB_REF -like 'refs/tags/v*') { $ver = $env:GITHUB_REF_NAME.Substring(1) }
+          else { $ver = "0.0.0-dev.$env:GITHUB_RUN_NUMBER" }
+          "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "Version: $ver"
 
-      - name: Attach to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+      - name: Publish (self-contained, win-${{ matrix.arch }})
+        shell: pwsh
+        run: |
+          dotnet publish Rooznama.csproj -c Release -r "win-${{ matrix.arch }}" `
+            --self-contained `
+            "-p:WindowsAppSDKSelfContained=true" `
+            "-p:PlatformTarget=${{ matrix.arch }}" `
+            "-p:Version=$env:VERSION" `
+            "-p:SatelliteResourceLanguages=en%3Bfa" `
+            -o "publish/${{ matrix.arch }}"
+          if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+
+      - name: Portable ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          $tmp = "portable-${{ matrix.arch }}"
+          Copy-Item "publish/${{ matrix.arch }}" $tmp -Recurse
+          New-Item "$tmp/portable.flag" -ItemType File | Out-Null   # settings and log stay next to the exe (.\data)
+          Compress-Archive -Path "$tmp/*" -DestinationPath "dist/Rooznama-$env:VERSION-portable-${{ matrix.arch }}.zip"
+
+      - name: Installer (Inno Setup)
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          $iscc = Get-ChildItem "${env:ProgramFiles(x86)}", "$env:ProgramFiles" -Filter ISCC.exe -Recurse -Depth 2 -ErrorAction SilentlyContinue |
+                  Select-Object -First 1 -ExpandProperty FullName
+          if (-not $iscc) { throw "ISCC.exe not found" }
+          & $iscc "/DAppVersion=$env:VERSION" "/DArch=${{ matrix.arch }}" "/DSourceDir=$PWD\publish\${{ matrix.arch }}" "/O$PWD\dist" installer\Rooznama.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
+
+      - uses: actions/upload-artifact@v4
         with:
-          files: ${{ env.ZIP_NAME }}
+          name: Rooznama-${{ matrix.arch }}
+          path: dist/*
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
           generate_release_notes: true

@@ -1,0 +1,23 @@
+<Page
+    x:Class="Rooznama.Views.SupportPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:svc="using:Rooznama.Services"
+    FontFamily="{StaticResource AppFontFamily}">
+
+    <StackPanel Padding="24,48" Spacing="14" MaxWidth="460" HorizontalAlignment="Center">
+        <FontIcon Glyph="&#xEB52;" FontSize="48" Foreground="{ThemeResource SystemFillColorCriticalBrush}"/>
+        <TextBlock Text="{x:Bind svc:Loc.T('support.title')}" Style="{StaticResource TitleTextBlockStyle}"
+                   HorizontalAlignment="Center"/>
+        <TextBlock Text="{x:Bind svc:Loc.T('support.text')}" TextWrapping="Wrap" TextAlignment="Center"/>
+        <Button Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Center" Padding="22,10"
+                Margin="0,8,0,0" Click="Support_Click">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <FontIcon Glyph="&#xEB52;" FontSize="16"/>
+                <TextBlock Text="{x:Bind svc:Loc.T('support.button')}"/>
+            </StackPanel>
+        </Button>
+        <HyperlinkButton x:Name="StarLink" HorizontalAlignment="Center"
+                         Content="{x:Bind svc:Loc.T('support.star')}"/>
+    </StackPanel>
+</Page>

@@ -13,16 +13,29 @@ public sealed class TrayService : IDisposable
 {
     const uint WM_TRAY = 0x8001;                       // WM_APP + 1
     const uint WM_MOUSEMOVE = 0x0200, WM_LBUTTONUP = 0x0202, WM_RBUTTONUP = 0x0205, WM_NULL = 0;
-    const uint WM_TIMECHANGE = 0x001E, WM_POWERBROADCAST = 0x0218;
-    const long PBT_APMRESUMESUSPEND = 0x7, PBT_APMRESUMEAUTOMATIC = 0x12;
+    const uint NIN_BALLOONUSERCLICK = 0x0405;
+    const uint WM_TIMECHANGE = 0x001E, WM_POWERBROADCAST = 0x0218, WM_WTSSESSION_CHANGE = 0x02B1;
+    const long PBT_APMRESUMECRITICAL = 0x6, PBT_APMRESUMESUSPEND = 0x7, PBT_APMRESUMEAUTOMATIC = 0x12;
+    const long WTS_CONSOLE_CONNECT = 1, WTS_REMOTE_CONNECT = 3, WTS_SESSION_LOGON = 5, WTS_SESSION_UNLOCK = 8;
     const uint NIM_ADD = 0, NIM_MODIFY = 1, NIM_DELETE = 2;
-    const uint NIF_MESSAGE = 1, NIF_ICON = 2, NIF_TIP = 4;
+    const uint NIF_MESSAGE = 1, NIF_ICON = 2, NIF_TIP = 4, NIF_INFO = 0x10;
+    const uint NIIF_INFO = 1;
     const uint MF_STRING = 0, MF_SEPARATOR = 0x800;
     const uint TPM_RIGHTBUTTON = 2, TPM_RIGHTALIGN = 8, TPM_BOTTOMALIGN = 0x20, TPM_RETURNCMD = 0x100, TPM_LAYOUTRTL = 0x8000;
 
     delegate IntPtr SubclassProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, UIntPtr id, UIntPtr data);
 
     [StructLayout(LayoutKind.Sequential)] struct POINT { public int X, Y; }
+    [StructLayout(LayoutKind.Sequential)] struct RECT { public int Left, Top, Right, Bottom; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct NOTIFYICONIDENTIFIER
+    {
+        public int cbSize;
+        public IntPtr hWnd;
+        public uint uID;
+        public Guid guidItem;
+    }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     struct NOTIFYICONDATA
@@ -45,6 +58,7 @@ public sealed class TrayService : IDisposable
     }
 
     [DllImport("shell32.dll", EntryPoint = "Shell_NotifyIconW", CharSet = CharSet.Unicode)] static extern bool Shell_NotifyIcon(uint msg, ref NOTIFYICONDATA data);
+    [DllImport("shell32.dll")] static extern int Shell_NotifyIconGetRect(ref NOTIFYICONIDENTIFIER id, out RECT rect);
     [DllImport("comctl32.dll")] static extern bool SetWindowSubclass(IntPtr hWnd, SubclassProc proc, UIntPtr id, UIntPtr data);
     [DllImport("comctl32.dll")] static extern bool RemoveWindowSubclass(IntPtr hWnd, SubclassProc proc, UIntPtr id);
     [DllImport("comctl32.dll")] static extern IntPtr DefSubclassProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
@@ -58,19 +72,37 @@ public sealed class TrayService : IDisposable
     [DllImport("user32.dll", EntryPoint = "PostMessageW")] static extern bool PostMessage(IntPtr hwnd, uint msg, IntPtr w, IntPtr l);
     [DllImport("user32.dll", EntryPoint = "RegisterWindowMessageW", CharSet = CharSet.Unicode)] static extern uint RegisterWindowMessage(string name);
 
+    // Suspend/resume (also delivered on Modern Standby) and session lock/unlock notifications.
+    [DllImport("user32.dll")] static extern IntPtr RegisterSuspendResumeNotification(IntPtr recipient, uint flags);
+    [DllImport("user32.dll")] static extern bool UnregisterSuspendResumeNotification(IntPtr handle);
+    [DllImport("wtsapi32.dll")] static extern bool WTSRegisterSessionNotification(IntPtr hwnd, uint flags);
+    [DllImport("wtsapi32.dll")] static extern bool WTSUnRegisterSessionNotification(IntPtr hwnd);
+
     // Undocumented uxtheme ordinals (used by many apps) so the native tray menu follows dark mode.
     [DllImport("uxtheme.dll", EntryPoint = "#135")] static extern int SetPreferredAppMode(int mode);
     [DllImport("uxtheme.dll", EntryPoint = "#136")] static extern void FlushMenuThemes();
 
     readonly IntPtr _hwnd;
-    readonly SubclassProc _proc;          // keep a reference so the delegate isn't collected
+    readonly SubclassProc _proc;                // keep a reference so the delegate isn't collected
     readonly uint _taskbarCreated;
-    readonly DispatcherQueueTimer _watchdog;   // every 30 s: safety net
-    readonly DispatcherQueueTimer _midnight;   // one-shot, exactly at the next local midnight
-    readonly DispatcherQueueTimer _soon;       // delayed re-check after resume / time change
+    readonly DispatcherQueue _dq;
+    readonly DispatcherQueueTimer _watchdog;    // every 30 s
+    readonly DispatcherQueueTimer _midnight;    // one-shot, exactly at the next local midnight
+    readonly DispatcherQueueTimer _soon;        // delayed re-check after resume / unlock / time change
+    readonly DispatcherQueueTimer _poll;        // hover tracking for the custom tooltip
+    readonly System.Threading.Timer _heartbeat; // thread-pool timer, independent of the UI dispatcher
+    readonly IntPtr _resumeHandle;
+
     IntPtr _hIcon;
     bool _added;
     DateTime _lastDate = DateTime.MinValue;
+    DateTime _lastBeatUtc = DateTime.UtcNow;
+
+    TipWindow? _tip;
+    bool _hovering, _tipShown;
+    long _hoverSince;
+    RECT _fallbackRect;
+    string? _balloonUrl;
 
     public TrayService()
     {
@@ -86,18 +118,13 @@ public sealed class TrayService : IDisposable
         _taskbarCreated = RegisterWindowMessage("TaskbarCreated");   // explorer restarted → re-add icon
         _proc = WndProc;
         SetWindowSubclass(_hwnd, _proc, (UIntPtr)1, UIntPtr.Zero);
+        _resumeHandle = RegisterSuspendResumeNotification(_hwnd, 0);   // DEVICE_NOTIFY_WINDOW_HANDLE
+        WTSRegisterSessionNotification(_hwnd, 0);                      // NOTIFY_FOR_THIS_SESSION
 
-        var dq = DispatcherQueue.GetForCurrentThread();
+        _dq = DispatcherQueue.GetForCurrentThread();
 
-        _watchdog = dq.CreateTimer();
-        _watchdog.Interval = TimeSpan.FromSeconds(30);
-        _watchdog.Tick += (_, _) => Safe(() =>
-        {
-            Refresh(false);
-            if (!_midnight.IsRunning) ArmMidnight();
-        });
-
-        _midnight = dq.CreateTimer();
+        // _midnight is created first: the watchdog lambda below uses it
+        _midnight = _dq.CreateTimer();
         _midnight.IsRepeating = false;
         _midnight.Tick += (_, _) => Safe(() =>
         {
@@ -105,15 +132,46 @@ public sealed class TrayService : IDisposable
             ArmMidnight();
         });
 
-        _soon = dq.CreateTimer();
+        _watchdog = _dq.CreateTimer();
+        _watchdog.Interval = TimeSpan.FromSeconds(30);
+        _watchdog.Tick += (_, _) => Safe(() =>
+        {
+            Refresh(false);
+            if (!_midnight.IsRunning) ArmMidnight();
+        });
+
+        _soon = _dq.CreateTimer();
         _soon.IsRepeating = false;
         _soon.Interval = TimeSpan.FromSeconds(3);
         _soon.Tick += (_, _) => Safe(() => Refresh());
 
+        _poll = _dq.CreateTimer();
+        _poll.Interval = TimeSpan.FromMilliseconds(150);
+        _poll.Tick += (_, _) => Safe(HoverTick);
+
         Refresh();
         ArmMidnight();
         _watchdog.Start();
-        Log.Write("tray started");
+
+        // Independent safety net: a thread-pool timer that does not depend on the XAML dispatcher timers.
+        // A gap of several minutes between two beats means the machine slept or hibernated.
+        _heartbeat = new System.Threading.Timer(_ =>
+        {
+            var now = DateTime.UtcNow;
+            bool gap = now - _lastBeatUtc > TimeSpan.FromMinutes(3);
+            _lastBeatUtc = now;
+            _dq.TryEnqueue(() => Safe(() =>
+            {
+                if (gap) Resync("long gap between heartbeats (sleep/hibernate)");
+                else
+                {
+                    Refresh(false);
+                    if (!_midnight.IsRunning) ArmMidnight();
+                }
+            }));
+        }, null, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60));
+
+        Log.Write($"tray started (v{AppInfo.VersionText}, portable={AppPaths.IsPortable})");
     }
 
     static void Safe(Action a)
@@ -132,11 +190,17 @@ public sealed class TrayService : IDisposable
         Log.Write($"midnight timer armed, fires in {wait:hh\\:mm\\:ss}");
     }
 
-    // sleep/resume or clock change: timers may have been lost or shifted
+    // sleep/resume, unlock or clock change: timers may have been lost or shifted
     void Resync(string why)
     {
         Log.Write(why);
-        Safe(() => { Refresh(); ArmMidnight(); });
+        Safe(() =>
+        {
+            Refresh();
+            ArmMidnight();
+            _watchdog.Stop();
+            _watchdog.Start();
+        });
         _soon.Stop();
         _soon.Start();                      // the shell may not be ready right after resume
     }
@@ -153,9 +217,14 @@ public sealed class TrayService : IDisposable
         {
             switch ((uint)((long)lParam & 0xFFFF))
             {
-                case WM_MOUSEMOVE: Safe(() => Refresh(false)); break;   // hovering = about to read the tooltip
-                case WM_LBUTTONUP: Toggle(); break;
-                case WM_RBUTTONUP: ShowMenu(); break;
+                case WM_MOUSEMOVE:
+                    Safe(() => { Refresh(false); BeginHover(); });   // hovering = about to read the tooltip
+                    break;
+                case WM_LBUTTONUP: EndHover(); Toggle(); break;
+                case WM_RBUTTONUP: EndHover(); ShowMenu(); break;
+                case NIN_BALLOONUSERCLICK:
+                    if (_balloonUrl is not null) _ = Windows.System.Launcher.LaunchUriAsync(new Uri(_balloonUrl));
+                    break;
             }
             return IntPtr.Zero;
         }
@@ -165,8 +234,13 @@ public sealed class TrayService : IDisposable
             Resync("taskbar re-created");
             return IntPtr.Zero;
         }
-        if (msg == WM_POWERBROADCAST && ((long)wParam == PBT_APMRESUMEAUTOMATIC || (long)wParam == PBT_APMRESUMESUSPEND))
-            Resync("resumed from sleep");
+        if (msg == WM_POWERBROADCAST &&
+            ((long)wParam == PBT_APMRESUMEAUTOMATIC || (long)wParam == PBT_APMRESUMESUSPEND || (long)wParam == PBT_APMRESUMECRITICAL))
+            Resync("resumed from sleep/hibernate");
+        else if (msg == WM_WTSSESSION_CHANGE &&
+                 ((long)wParam == WTS_SESSION_UNLOCK || (long)wParam == WTS_SESSION_LOGON ||
+                  (long)wParam == WTS_CONSOLE_CONNECT || (long)wParam == WTS_REMOTE_CONNECT))
+            Resync("session unlocked/connected");
         else if (msg == WM_TIMECHANGE)
             Resync("system time changed");
 
@@ -209,6 +283,69 @@ public sealed class TrayService : IDisposable
         }
     }
 
+    // ---------- custom right-to-left tooltip ----------
+    bool GetIconRect(out RECT r)
+    {
+        var id = new NOTIFYICONIDENTIFIER { cbSize = Marshal.SizeOf<NOTIFYICONIDENTIFIER>(), hWnd = _hwnd, uID = 1 };
+        return Shell_NotifyIconGetRect(ref id, out r) == 0;
+    }
+
+    void BeginHover()
+    {
+        if (_hovering || !App.Settings.CustomTooltip || App.Flyout.IsShown) return;
+        _hovering = true;
+        _hoverSince = Environment.TickCount64;
+        var (x, y) = CursorPos();
+        _fallbackRect = new RECT { Left = x - 12, Top = y - 12, Right = x + 12, Bottom = y + 12 };   // if the shell can't report the icon rect
+        _poll.Start();
+    }
+
+    void HoverTick()
+    {
+        var rect = GetIconRect(out var r) ? r : _fallbackRect;
+        var (cx, cy) = CursorPos();
+        bool inside = cx >= rect.Left - 2 && cx <= rect.Right + 2 && cy >= rect.Top - 2 && cy <= rect.Bottom + 2;
+        if (!inside || App.Flyout.IsShown || !App.Settings.CustomTooltip) { EndHover(); return; }
+
+        if (!_tipShown && Environment.TickCount64 - _hoverSince >= 450)
+        {
+            _tip ??= new TipWindow();
+            _tip.ShowAbove(rect.Left, rect.Top, rect.Right, rect.Bottom);
+            _tipShown = true;
+        }
+    }
+
+    void EndHover()
+    {
+        _poll.Stop();
+        _hovering = false;
+        if (_tipShown) { _tip?.HideTip(); _tipShown = false; }
+    }
+
+    // ---------- icon ----------
+    NOTIFYICONDATA Base(uint flags) => new()
+    {
+        cbSize = Marshal.SizeOf<NOTIFYICONDATA>(),
+        hWnd = _hwnd,
+        uID = 1,
+        uFlags = flags,
+        uCallbackMessage = WM_TRAY,
+        szTip = "",
+        szInfo = "",
+        szInfoTitle = ""
+    };
+
+    /// <summary>Balloon / toast from the tray icon; clicking it opens <paramref name="url"/>.</summary>
+    public void Notify(string title, string text, string? url)
+    {
+        _balloonUrl = url;
+        var nid = Base(NIF_INFO);
+        nid.szInfoTitle = title.Length > 63 ? title[..63] : title;
+        nid.szInfo = text.Length > 255 ? text[..255] : text;
+        nid.dwInfoFlags = NIIF_INFO;
+        Shell_NotifyIcon(NIM_MODIFY, ref nid);
+    }
+
     /// <param name="force">false = only when the day changed</param>
     public void Refresh(bool force = true)
     {
@@ -225,16 +362,10 @@ public sealed class TrayService : IDisposable
         var oldIcon = _hIcon;
         _hIcon = MakeIcon(PersianDate.Day(today));
 
-        var nid = new NOTIFYICONDATA
-        {
-            cbSize = Marshal.SizeOf<NOTIFYICONDATA>(),
-            hWnd = _hwnd,
-            uID = 1,
-            uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP,
-            uCallbackMessage = WM_TRAY,
-            hIcon = _hIcon,
-            szTip = text
-        };
+        var nid = Base(NIF_MESSAGE | NIF_ICON | NIF_TIP);
+        nid.hIcon = _hIcon;
+        nid.szTip = App.Settings.CustomTooltip ? "" : text;     // empty = no system tooltip, our own is shown instead
+
         // if the shell lost our icon (modify fails), add it again
         if (!_added || !Shell_NotifyIcon(NIM_MODIFY, ref nid))
             _added = Shell_NotifyIcon(NIM_ADD, ref nid);
@@ -320,10 +451,17 @@ public sealed class TrayService : IDisposable
 
     public void Dispose()
     {
+        _heartbeat.Dispose();
         _watchdog.Stop();
         _midnight.Stop();
         _soon.Stop();
-        var nid = new NOTIFYICONDATA { cbSize = Marshal.SizeOf<NOTIFYICONDATA>(), hWnd = _hwnd, uID = 1, szTip = "", szInfo = "", szInfoTitle = "" };
+        EndHover();
+        _tip?.Close();
+
+        if (_resumeHandle != IntPtr.Zero) UnregisterSuspendResumeNotification(_resumeHandle);
+        WTSUnRegisterSessionNotification(_hwnd);
+
+        var nid = Base(0);
         Shell_NotifyIcon(NIM_DELETE, ref nid);
         RemoveWindowSubclass(_hwnd, _proc, (UIntPtr)1);
         if (_hIcon != IntPtr.Zero) { DestroyIcon(_hIcon); _hIcon = IntPtr.Zero; }

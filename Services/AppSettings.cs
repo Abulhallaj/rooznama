@@ -6,16 +6,19 @@ namespace Rooznama.Services;
 public sealed class AppSettings
 {
     public bool ShowGregorianInTooltip { get; set; } = true;
+    public string IconColor { get; set; } = "#0078D7";
+    public bool AutoHide { get; set; } = true;
+    public bool StartWithWindows { get; set; }
     public bool CalendarCollapsed { get; set; }
     public string Language { get; set; } = "fa";          // fa | en
     public string FontName { get; set; } = "Vazirmatn";   // Vazirmatn | Tahoma
     public string Theme { get; set; } = "auto";           // auto | light | dark
-    public string IconColor { get; set; } = "#0078D7";
-    public bool AutoHide { get; set; } = true;
-    public bool StartWithWindows { get; set; }
+    public bool CustomTooltip { get; set; } = true;       // own right-to-left tray tooltip instead of the system one
+    public bool CheckUpdates { get; set; } = true;
+    public DateTime LastUpdateCheckUtc { get; set; }
+    public string LastNotifiedVersion { get; set; } = "";
 
-    static string FilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Rooznama", "settings.json");
+    static string FilePath => Path.Combine(AppPaths.DataDir, "settings.json");
 
     public static AppSettings Load()
     {

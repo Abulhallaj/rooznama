@@ -16,6 +16,11 @@
                 <NavigationViewItem x:Name="NavConverter" Icon="Sync" Tag="converter"/>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="NavSupport" Tag="support">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEB51;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Name="NavSettings" Icon="Setting" Tag="settings"/>
                 <NavigationViewItem x:Name="NavAbout" Icon="Help" Tag="about"/>
             </NavigationView.FooterMenuItems>

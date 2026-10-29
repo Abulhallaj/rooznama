@@ -55,6 +55,29 @@ public static class Loc
                           "A lightweight Shamsi (Jalali) calendar for the system tray: the day on the icon, Shamsi and Gregorian dates in the tooltip, a monthly calendar and a date converter."),
         ["about.font"] = ("فونت", "Font"),
         ["about.tech"] = ("ساخته‌شده با .NET و WinUI 3", "Built with .NET and WinUI 3"),
+        ["about.project"] = ("پروژه در GitHub", "Project on GitHub"),
+        ["about.issues"] = ("گزارش مشکل یا پیشنهاد", "Report an issue / suggest"),
+        ["about.portable"] = ("حالت پرتابل (تنظیمات کنار برنامه ذخیره می‌شود)", "Portable mode (settings are stored next to the app)"),
+
+        ["support"] = ("حمایت", "Support"),
+        ["support.title"] = ("حمایت از روزنما", "Support Rooznama"),
+        ["support.text"] = ("روزنما رایگان و متن‌باز است. اگر برایتان مفید بوده، می‌توانید با دعوت من به یک قهوه از ادامه توسعه‌اش حمایت کنید. حمایت کاملاً اختیاری است و چیزی را قفل نمی‌کند.",
+                            "Rooznama is free and open source. If you find it useful, you can support its development by buying me a coffee. Support is entirely optional and unlocks nothing."),
+        ["support.button"] = ("حمایت از پروژه", "Support the project"),
+        ["support.star"] = ("ستاره دادن در GitHub", "Star on GitHub"),
+
+        ["set.customtip"] = ("tooltip راست‌چین اختصاصی روی آیکون", "Custom right-to-left tooltip on the tray icon"),
+        ["set.updates"] = ("به‌روزرسانی", "Updates"),
+        ["set.updates.auto"] = ("بررسی خودکار نسخه جدید", "Check for updates automatically"),
+        ["set.updates.note"] = ("فقط آخرین نسخه از GitHub خوانده می‌شود؛ اطلاعات شخصی یا آمار استفاده ارسال نمی‌شود.",
+                                "Only the latest release is read from GitHub; no personal data or usage statistics are sent."),
+        ["set.updates.check"] = ("بررسی اکنون", "Check now"),
+        ["upd.checking"] = ("در حال بررسی…", "Checking…"),
+        ["upd.uptodate"] = ("نسخه شما به‌روز است.", "You're up to date."),
+        ["upd.available"] = ("نسخه جدید {0} موجود است", "Version {0} is available"),
+        ["upd.download"] = ("دانلود", "Download"),
+        ["upd.failed"] = ("بررسی انجام نشد (اتصال اینترنت؟)", "Couldn't check (no internet?)"),
+        ["upd.dev"] = ("نسخه توسعه است؛ بررسی به‌روزرسانی غیرفعال است.", "Development build; update check is disabled."),
     };
 
     public static string T(string key) => S.TryGetValue(key, out var v) ? (IsFa ? v.Fa : v.En) : key;

@@ -83,12 +83,7 @@ public sealed partial class FlyoutWindow : Window
         SetWindowPos(_hwnd, IntPtr.Zero, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0010 | 0x0020); // NOSIZE|NOMOVE|NOZORDER|NOACTIVATE|FRAMECHANGED
     }
 
-    static bool IsDark() => App.Settings.Theme switch
-    {
-        "dark" => true,
-        "light" => false,
-        _ => new UISettings().GetColorValue(UIColorType.Background).R < 128
-    };
+    static bool IsDark() => ThemeHelper.IsDark();
 
     // single subtle 1px DWM border, tuned to the current theme (like the system flyouts)
     void ApplyChrome()

@@ -1,0 +1,13 @@
+<Window
+    x:Class="Rooznama.TipWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border x:Name="Root" Padding="12,8" CornerRadius="8"
+            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
+        <StackPanel Spacing="2">
+            <TextBlock x:Name="Line1" FontWeight="SemiBold" FontFamily="{StaticResource AppFontFamily}"/>
+            <TextBlock x:Name="Line2" FontSize="12" Opacity="0.75" FontFamily="{StaticResource AppFontFamily}"/>
+        </StackPanel>
+    </Border>
+</Window>

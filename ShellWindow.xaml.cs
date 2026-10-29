@@ -30,6 +30,7 @@ public sealed partial class ShellWindow : Window
         NavConverter.Content = Loc.T("converter");
         NavSettings.Content = Loc.T("settings");
         NavAbout.Content = Loc.T("about");
+        NavSupport.Content = Loc.T("support");
 
         Nav.SelectedItem = NavCalendar;
         SizeAndCenter();
@@ -60,6 +61,7 @@ public sealed partial class ShellWindow : Window
             "converter" => typeof(ConverterPage),
             "settings" => typeof(SettingsPage),
             "about" => typeof(AboutPage),
+            "support" => typeof(SupportPage),
             _ => typeof(CalendarPage)
         };
         ContentFrame.Navigate(page);

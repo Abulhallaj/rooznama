@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Rooznama.Services;
 
 namespace Rooznama.Views;
 
@@ -15,6 +16,8 @@ public sealed partial class SettingsPage : Page
         GregorianSwitch.IsOn = s.ShowGregorianInTooltip;
         AutoHideSwitch.IsOn = s.AutoHide;
         StartupSwitch.IsOn = s.StartWithWindows;
+        CustomTipSwitch.IsOn = s.CustomTooltip;
+        UpdatesSwitch.IsOn = s.CheckUpdates;
         Select(ColorBox, s.IconColor);
         Select(LangBox, s.Language);
         Select(FontBox, s.FontName);
@@ -54,10 +57,43 @@ public sealed partial class SettingsPage : Page
         s.ShowGregorianInTooltip = GregorianSwitch.IsOn;
         s.AutoHide = AutoHideSwitch.IsOn;
         s.StartWithWindows = StartupSwitch.IsOn;
+        s.CustomTooltip = CustomTipSwitch.IsOn;
+        s.CheckUpdates = UpdatesSwitch.IsOn;
         s.IconColor = TagOf(ColorBox, s.IconColor);
 
         s.Save();
         s.ApplyStartup();
         App.Tray.Refresh();
+    }
+
+    async void Check_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateLink.Visibility = Visibility.Collapsed;
+        if (AppInfo.IsDev)
+        {
+            CheckStatus.Text = Loc.T("upd.dev");
+            return;
+        }
+
+        CheckBtn.IsEnabled = false;
+        CheckStatus.Text = Loc.T("upd.checking");
+        var r = await UpdateService.CheckAsync();
+        CheckBtn.IsEnabled = true;
+
+        if (!r.Ok)
+        {
+            CheckStatus.Text = Loc.T("upd.failed");
+        }
+        else if (r.Update is { } u)
+        {
+            CheckStatus.Text = string.Format(Loc.T("upd.available"), u.Tag);
+            UpdateLink.Content = Loc.T("upd.download");
+            UpdateLink.NavigateUri = new Uri(u.Url);
+            UpdateLink.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            CheckStatus.Text = Loc.T("upd.uptodate");
+        }
     }
 }

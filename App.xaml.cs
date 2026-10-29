@@ -36,6 +36,9 @@ public partial class App : Application
         ApplyFont();
         Flyout = new FlyoutWindow();   // created hidden; shown from the tray
         Tray = new TrayService();
+
+        if (Settings.StartWithWindows) Settings.ApplyStartup();   // keeps the Run path current if the exe was moved/updated
+        UpdateService.Start();
     }
 
     /// <summary>The FontFamily string actually applied (shown in About for diagnosis).</summary>

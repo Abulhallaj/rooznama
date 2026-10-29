@@ -66,6 +66,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <ComboBox x:Name="ColorBox" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch"
@@ -94,7 +95,41 @@
                             <ToggleSwitch x:Name="AutoHideSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
                                           OffContent="{x:Bind svc:Loc.T('off')}" Toggled="Option_Toggled"/>
                         </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Spacing="4">
+                            <TextBlock Text="{x:Bind svc:Loc.T('set.customtip')}" TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="CustomTipSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
+                                          OffContent="{x:Bind svc:Loc.T('off')}" Toggled="Option_Toggled"/>
+                        </StackPanel>
                     </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Updates -->
+            <Border Padding="16" CornerRadius="8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="{x:Bind svc:Loc.T('set.updates')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Text="{x:Bind svc:Loc.T('set.updates.auto')}" TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="UpdatesSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
+                                          OffContent="{x:Bind svc:Loc.T('off')}" Toggled="Option_Toggled"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="6">
+                            <Button x:Name="CheckBtn" Content="{x:Bind svc:Loc.T('set.updates.check')}" Click="Check_Click"/>
+                            <TextBlock x:Name="CheckStatus" TextWrapping="Wrap" Opacity="0.8"/>
+                            <HyperlinkButton x:Name="UpdateLink" Padding="0" Visibility="Collapsed"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Text="{x:Bind svc:Loc.T('set.updates.note')}" TextWrapping="Wrap" Opacity="0.6" FontSize="12"/>
                 </StackPanel>
             </Border>
         </StackPanel>

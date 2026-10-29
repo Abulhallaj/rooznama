@@ -6,7 +6,7 @@ Rooznama itself is released under the MIT License (see `LICENSE`). It uses or sh
 
 - Project: https://github.com/rastikerdar/vazirmatn
 - License: SIL Open Font License 1.1 — https://openfontlicense.org
-
+- If you commit or redistribute the font files, also keep the `OFL.txt` that comes with the font release next to them (copy it to `Assets/Fonts/OFL.txt`). The font is not sold on its own and must keep its own name and license.
 
 ## Libraries
 

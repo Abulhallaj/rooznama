@@ -1,12 +1,11 @@
 namespace Rooznama.Services;
 
-/// <summary>Tiny diagnostic log: %AppData%\Rooznama\rooznama.log (trimmed at 100 KB).</summary>
+/// <summary>Tiny diagnostic log: rooznama.log in the data folder (trimmed at 100 KB).</summary>
 public static class Log
 {
     static readonly object Gate = new();
 
-    static string FilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Rooznama", "rooznama.log");
+    static string FilePath => Path.Combine(AppPaths.DataDir, "rooznama.log");
 
     public static void Write(string message)
     {
