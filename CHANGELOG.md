@@ -3,8 +3,17 @@
 All notable changes to **Rooznama (روزنما)** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
-## [0.6.0] - Unreleased
+## Unreleased
 
+## [0.6.1] - 2026-10-30
+### Fixed
+- A small empty system tooltip box appeared over or under the custom tray tooltip; the icon is now registered without a system tip when the custom tooltip is on.
+- About page version display
+
+### Changed
+- Build workflow triggers on version tags
+
+## [0.6.0] - 2026-10-29
 ### Added
 - **Four release downloads** from CI, all self-contained (no .NET or Windows App SDK installation needed): portable ZIP and installer, each for 64-bit (x64) and 32-bit (x86).
 - **Installer** (Inno Setup): per-user by default (no admin rights), Start menu entry, optional desktop icon, clean uninstall (also removes the "start with Windows" entry).
