@@ -95,6 +95,7 @@ public sealed class TrayService : IDisposable
 
     IntPtr _hIcon;
     bool _added;
+    bool _addedCustomTip;                  // tooltip mode the icon was added with
     DateTime _lastDate = DateTime.MinValue;
     DateTime _lastBeatUtc = DateTime.UtcNow;
 
@@ -362,13 +363,26 @@ public sealed class TrayService : IDisposable
         var oldIcon = _hIcon;
         _hIcon = MakeIcon(PersianDate.Day(today));
 
-        var nid = Base(NIF_MESSAGE | NIF_ICON | NIF_TIP);
+        // Custom tooltip: the icon is registered WITHOUT a tip at all. (An empty tip still makes the shell pop up a
+        // tiny empty tooltip box over/under our own window.)
+        bool custom = App.Settings.CustomTooltip;
+        if (_added && _addedCustomTip != custom)      // tooltip mode changed: re-add the icon so no stale system tip remains
+        {
+            var del = Base(0);
+            Shell_NotifyIcon(NIM_DELETE, ref del);
+            _added = false;
+        }
+
+        var nid = Base(NIF_MESSAGE | NIF_ICON | (custom ? 0u : NIF_TIP));
         nid.hIcon = _hIcon;
-        nid.szTip = App.Settings.CustomTooltip ? "" : text;     // empty = no system tooltip, our own is shown instead
+        if (!custom) nid.szTip = text;
 
         // if the shell lost our icon (modify fails), add it again
         if (!_added || !Shell_NotifyIcon(NIM_MODIFY, ref nid))
+        {
             _added = Shell_NotifyIcon(NIM_ADD, ref nid);
+            _addedCustomTip = custom;
+        }
 
         if (oldIcon != IntPtr.Zero) DestroyIcon(oldIcon);
     }
