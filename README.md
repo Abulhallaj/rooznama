@@ -14,7 +14,12 @@
 
 </div>
 
-<!-- Add screenshots to docs/screenshots and link them here -->
+
+## اسکرین‌شات‌ها
+
+| صفحه اصلی تقویم | صفحه جهنده تقویم |
+|:---:|:---:|
+| ![صفحه اصلی برنامه](docs/screenshots/Rooznama_CalendarWindow.png) | ![صفحه جهنده تقویم](docs/screenshots/Rooznama_FlyoutWindow.png) |
 
 ---
 
@@ -63,7 +68,7 @@ dotnet publish -c Release -r win-x64 --self-contained -p:WindowsAppSDKSelfContai
 اگر بعد از جایگزینی فایل‌ها خطای `XamlCompiler` دیدید، پوشه‌های `bin` و `obj` را پاک کنید.
 
 ### فونت وزیرمتن
-فایل‌های [Vazirmatn](https://github.com/rastikerdar/vazirmatn) (`Vazirmatn-Regular.ttf` و `Vazirmatn-Bold.ttf` و `OFL.txt`) را در `Assets/Fonts` بگذارید، یا فونت را روی ویندوز نصب کنید (مطمئن‌ترین راه). در صفحه «درباره» فونتِ اعمال‌شده دیده می‌شود. بدون آن، از Segoe UI استفاده می‌شود.
+فایل‌های [Vazirmatn](https://github.com/rastikerdar/vazirmatn) (`Vazirmatn-Regular.ttf` و `Vazirmatn-Bold.ttf` و `OFL.txt`) در `Assets/Fonts` قرار دارند، به منظور اطمینان بیشتر می توانید آنها را نصب کنید. در صفحه «درباره» فونتِ اعمال‌شده دیده می‌شود. بدون آنها، از Segoe UI استفاده می‌شود.
 
 ### داده‌ها و لاگ
 - نصبی: `%AppData%\Rooznama\settings.json` و `rooznama.log`
