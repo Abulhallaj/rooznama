@@ -15,7 +15,7 @@ public sealed class TrayService : IDisposable
     const uint WM_MOUSEMOVE = 0x0200, WM_LBUTTONUP = 0x0202, WM_RBUTTONUP = 0x0205, WM_NULL = 0;
     const uint NIN_BALLOONUSERCLICK = 0x0405;
     const uint WM_TIMECHANGE = 0x001E, WM_POWERBROADCAST = 0x0218, WM_WTSSESSION_CHANGE = 0x02B1;
-    const long PBT_APMRESUMECRITICAL = 0x6, PBT_APMRESUMESUSPEND = 0x7, PBT_APMRESUMEAUTOMATIC = 0x12;
+    const long PBT_APMSUSPEND = 0x4, PBT_APMRESUMECRITICAL = 0x6, PBT_APMRESUMESUSPEND = 0x7, PBT_APMRESUMEAUTOMATIC = 0x12;
     const long WTS_CONSOLE_CONNECT = 1, WTS_REMOTE_CONNECT = 3, WTS_SESSION_LOGON = 5, WTS_SESSION_UNLOCK = 8;
     const uint NIM_ADD = 0, NIM_MODIFY = 1, NIM_DELETE = 2;
     const uint NIF_MESSAGE = 1, NIF_ICON = 2, NIF_TIP = 4, NIF_INFO = 0x10;
@@ -96,7 +96,13 @@ public sealed class TrayService : IDisposable
     IntPtr _hIcon;
     bool _added;
     bool _addedCustomTip;                  // tooltip mode the icon was added with
-    DateTime _lastDate = DateTime.MinValue;
+    DateTime _shownDate = DateTime.MinValue;     // day the shell has accepted on the icon (set only after success)
+    DateTime _lastLoggedDate = DateTime.MinValue;
+    DateTime _lastSendUtc = DateTime.MinValue;
+    DateTime _lastHealTryUtc = DateTime.MinValue;
+    int _soonLeft;
+    bool _failing;                                  // last icon update failed (log only the transitions)
+    DateTime _lastResyncUtc = DateTime.MinValue;
     DateTime _lastBeatUtc = DateTime.UtcNow;
 
     TipWindow? _tip;
@@ -144,7 +150,15 @@ public sealed class TrayService : IDisposable
         _soon = _dq.CreateTimer();
         _soon.IsRepeating = false;
         _soon.Interval = TimeSpan.FromSeconds(3);
-        _soon.Tick += (_, _) => Safe(() => Refresh());
+        _soon.Tick += (_, _) =>
+        {
+            Safe(() => Refresh());
+            if (--_soonLeft > 0)
+            {
+                _soon.Interval = TimeSpan.FromSeconds(20);   // re-check at +3 s, +23 s, +43 s after the event
+                _soon.Start();
+            }
+        };
 
         _poll = _dq.CreateTimer();
         _poll.Interval = TimeSpan.FromMilliseconds(150);
@@ -181,29 +195,33 @@ public sealed class TrayService : IDisposable
         catch (Exception ex) { Log.Write("ERROR " + ex); }
     }
 
-    void ArmMidnight()
+    void ArmMidnight(bool log = true)
     {
         var now = DateTime.Now;
         var wait = now.Date.AddDays(1) - now + TimeSpan.FromSeconds(1);
         _midnight.Stop();
         _midnight.Interval = wait;
         _midnight.Start();
-        Log.Write($"midnight timer armed, fires in {wait:hh\\:mm\\:ss}");
+        if (log) Log.Write($"midnight timer armed, fires in {wait:hh\\:mm\\:ss}");
     }
 
     // sleep/resume, unlock or clock change: timers may have been lost or shifted
     void Resync(string why)
     {
-        Log.Write(why);
+        var now = DateTime.UtcNow;
+        if (now - _lastResyncUtc > TimeSpan.FromSeconds(2)) Log.Write(why);   // these events usually arrive in a burst
+        _lastResyncUtc = now;
         Safe(() =>
         {
             Refresh();
-            ArmMidnight();
+            ArmMidnight(false);
             _watchdog.Stop();
             _watchdog.Start();
         });
+        _soonLeft = 3;                      // the shell may not be ready right after resume: check again a few times
         _soon.Stop();
-        _soon.Start();                      // the shell may not be ready right after resume
+        _soon.Interval = TimeSpan.FromSeconds(3);
+        _soon.Start();
     }
 
     public static (int X, int Y) CursorPos()
@@ -219,7 +237,7 @@ public sealed class TrayService : IDisposable
             switch ((uint)((long)lParam & 0xFFFF))
             {
                 case WM_MOUSEMOVE:
-                    Safe(() => { Refresh(false); BeginHover(); });   // hovering = about to read the tooltip
+                    Safe(() => { HealIcon(); BeginHover(); });   // hovering = the user is looking at the icon
                     break;
                 case WM_LBUTTONUP: EndHover(); Toggle(); break;
                 case WM_RBUTTONUP: EndHover(); ShowMenu(); break;
@@ -235,6 +253,9 @@ public sealed class TrayService : IDisposable
             Resync("taskbar re-created");
             return IntPtr.Zero;
         }
+        if (msg == WM_POWERBROADCAST && (long)wParam == PBT_APMSUSPEND)
+            Log.Write("entering sleep/hibernate");          // lets the log show what happened right before a resume
+
         if (msg == WM_POWERBROADCAST &&
             ((long)wParam == PBT_APMRESUMEAUTOMATIC || (long)wParam == PBT_APMRESUMESUSPEND || (long)wParam == PBT_APMRESUMECRITICAL))
             Resync("resumed from sleep/hibernate");
@@ -282,6 +303,18 @@ public sealed class TrayService : IDisposable
             case 4: App.ShowShell("about"); break;
             case 9: App.Quit(); break;
         }
+    }
+
+    // The user is looking at the icon: make sure it shows today, and re-send it now and then (throttled).
+    void HealIcon()
+    {
+        bool wrongDay = !_added || _shownDate != DateTime.Today;
+        bool old = DateTime.UtcNow - _lastSendUtc > TimeSpan.FromMinutes(5);
+        if (!wrongDay && !old) return;
+        if (DateTime.UtcNow - _lastHealTryUtc < TimeSpan.FromSeconds(5)) return;
+        _lastHealTryUtc = DateTime.UtcNow;
+        if (wrongDay) Log.Write("hover: the icon shows the wrong day, re-sending it");
+        Refresh(true);
     }
 
     // ---------- custom right-to-left tooltip ----------
@@ -347,21 +380,37 @@ public sealed class TrayService : IDisposable
         Shell_NotifyIcon(NIM_MODIFY, ref nid);
     }
 
-    /// <param name="force">false = only when the day changed</param>
+    /// <param name="force">false = skip when the icon already shows today's day</param>
     public void Refresh(bool force = true)
     {
+        // .NET caches the local time zone: without this, a changed time zone / DST rule is not seen until restart
+        TimeZoneInfo.ClearCachedData();
         var today = DateTime.Today;
-        if (!force && today == _lastDate) return;
-        if (today != _lastDate) Log.Write($"day changed → {today:yyyy-MM-dd} (Shamsi day {PersianDate.Day(today)})");
-        _lastDate = today;
+        if (today != _lastLoggedDate)
+        {
+            Log.Write($"day changed → {today:yyyy-MM-dd} (Shamsi day {PersianDate.Day(today)})");
+            _lastLoggedDate = today;
+        }
+
+        // _shownDate is set only after the shell accepted the icon, so a failed update (for example the taskbar
+        // isn't ready right after hibernate) is retried by the next watchdog tick, heartbeat or hover.
+        if (!force && _added && _shownDate == today) return;
 
         var text = PersianDate.Full(today);
         if (App.Settings.ShowGregorianInTooltip)
             text += "\n" + today.ToString("dddd, dd MMMM yyyy", CultureInfo.InvariantCulture);
         if (text.Length > 127) text = text[..127];
 
+        IntPtr newIcon;
+        try { newIcon = MakeIcon(PersianDate.Day(today)); }
+        catch (Exception ex)
+        {
+            Log.Write("MakeIcon failed, resetting the font cache: " + ex.Message);
+            ResetIconFont();
+            newIcon = MakeIcon(PersianDate.Day(today));
+        }
         var oldIcon = _hIcon;
-        _hIcon = MakeIcon(PersianDate.Day(today));
+        _hIcon = newIcon;
 
         // Custom tooltip: the icon is registered WITHOUT a tip at all. (An empty tip still makes the shell pop up a
         // tiny empty tooltip box over/under our own window.)
@@ -377,14 +426,29 @@ public sealed class TrayService : IDisposable
         nid.hIcon = _hIcon;
         if (!custom) nid.szTip = text;
 
-        // if the shell lost our icon (modify fails), add it again
-        if (!_added || !Shell_NotifyIcon(NIM_MODIFY, ref nid))
-        {
-            _added = Shell_NotifyIcon(NIM_ADD, ref nid);
-            _addedCustomTip = custom;
-        }
+        // Always try MODIFY first (the icon normally exists) and fall back to ADD only if the shell says it doesn't.
+        // MODIFY must never be skipped: if the shell was briefly unresponsive (sleep/hibernate resume), a failed
+        // MODIFY followed by a failed ADD ("already exists") must not leave us trying only ADD forever.
+        bool ok = Shell_NotifyIcon(NIM_MODIFY, ref nid);
+        if (!ok) ok = Shell_NotifyIcon(NIM_ADD, ref nid);
+        _added = ok;
+        if (ok) _addedCustomTip = custom;
 
         if (oldIcon != IntPtr.Zero) DestroyIcon(oldIcon);
+
+        if (ok)
+        {
+            if (_shownDate != today) Log.Write($"icon updated → Shamsi day {PersianDate.Day(today)}");
+            _shownDate = today;
+            _lastSendUtc = DateTime.UtcNow;
+            if (_failing) Log.Write("icon update recovered");
+            _failing = false;
+        }
+        else
+        {
+            if (!_failing) Log.Write("icon update failed (the shell did not accept MODIFY or ADD), will retry");
+            _failing = true;
+        }
     }
 
     const float IconPx = 32f, IconFit = 30f;      // 1px margin
@@ -392,6 +456,16 @@ public sealed class TrayService : IDisposable
     static FontStyle _iconStyle = FontStyle.Bold;
     static PrivateFontCollection? _pfc;               // keeps a bundled font alive
     static float _em;
+    static bool _fallbackFont;                      // set after a GDI+ failure: don't use the bundled font file any more
+
+    static void ResetIconFont()
+    {
+        _iconFont = null;
+        _pfc?.Dispose();
+        _pfc = null;
+        _em = 0;
+        _fallbackFont = true;
+    }
 
     static FontFamily IconFont()
     {
@@ -399,7 +473,7 @@ public sealed class TrayService : IDisposable
 
         var dir = Path.Combine(AppContext.BaseDirectory, "Assets", "Fonts");
         var wanted = App.Settings.FontName;
-        foreach (var name in wanted == "Vazirmatn" ? new[] { "Vazirmatn-Bold.ttf", "Vazirmatn-Regular.ttf" } : Array.Empty<string>())
+        foreach (var name in wanted == "Vazirmatn" && !_fallbackFont ? new[] { "Vazirmatn-Bold.ttf", "Vazirmatn-Regular.ttf" } : Array.Empty<string>())
         {
             var file = Path.Combine(dir, name);
             if (!File.Exists(file)) continue;
