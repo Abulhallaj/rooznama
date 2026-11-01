@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## Unreleased
 
+## [0.6.2] - 2026-11-01
+### Fixed
+- **Tray day number not updating after manual date change.** The number stayed stale when the manually date change occured. Besides the earlier midnight timer and watchdog, the app now also listens for suspend/resume notifications (including Modern Standby), session unlock/connect and clock changes, and runs a thread-pool heartbeat that detects a long gap between beats; every one of these events refreshes the icon and re-arms the timers. All events are written to the log (`rooznama.log`).
+
+### Docs
+- **Readme updated with screenshots
+
 ## [0.6.1] - 2026-10-30
 ### Fixed
 - A small empty system tooltip box appeared over or under the custom tray tooltip; the icon is now registered without a system tip when the custom tooltip is on.
