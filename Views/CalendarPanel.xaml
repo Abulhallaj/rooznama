@@ -36,26 +36,51 @@
 
         <Grid x:Name="ViewGrid" Grid.Row="1" Height="268"/>
 
-        <Grid Grid.Row="2" RowSpacing="4">
+        <Grid x:Name="LowerGrid" Grid.Row="2" RowSpacing="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Text="{x:Bind svc:Loc.T('events')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-            <Grid Grid.Row="1">
-                <TextBlock x:Name="NoEvents" Text="{x:Bind svc:Loc.T('events.none')}" Opacity="0.6"/>
-                <ListView x:Name="EventsList" SelectionMode="None" MaxHeight="160">
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="svc:CalendarEvent">
-                            <StackPanel Padding="0,4">
-                                <TextBlock Text="{x:Bind Title}"/>
-                                <TextBlock Text="{x:Bind TimeText}" Opacity="0.7"
-                                           Style="{StaticResource CaptionTextBlockStyle}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="2">
+                    <TextBlock x:Name="NoEvents" Text="{x:Bind svc:Loc.T('events.none')}" Opacity="0.6"/>
+                    <!-- official holidays (red) and other observances are kept apart -->
+                    <ItemsControl x:Name="HolidaysList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="svc:OccasionRow">
+                                <StackPanel Padding="0,3">
+                                    <TextBlock Text="{x:Bind Text}" Foreground="IndianRed" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{x:Bind Caption}" Foreground="IndianRed" Opacity="0.8"
+                                               Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ItemsControl x:Name="ObservancesList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="svc:OccasionRow">
+                                <StackPanel Padding="0,3">
+                                    <TextBlock Text="{x:Bind Text}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{x:Bind Caption}" Opacity="0.6"
+                                               Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ListView x:Name="EventsList" SelectionMode="None" MaxHeight="160">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="svc:CalendarEvent">
+                                <StackPanel Padding="0,4">
+                                    <TextBlock Text="{x:Bind Title}"/>
+                                    <TextBlock Text="{x:Bind TimeText}" Opacity="0.7"
+                                               Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </UserControl>

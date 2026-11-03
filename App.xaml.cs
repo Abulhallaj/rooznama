@@ -16,6 +16,10 @@ public partial class App : Application
     // Swap this later for a Google Calendar (or other) provider.
     public static ICalendarEventProvider Events { get; set; } = new NullEventProvider();
 
+    // Bundled offline holidays and observances (calendar\ next to the exe).
+    public static CalendarEventService CalendarData { get; } =
+        new(Path.Combine(AppContext.BaseDirectory, "calendar"), Log.Write);
+
     public static FlyoutWindow Flyout { get; private set; } = null!;
     public static TrayService Tray { get; private set; } = null!;
 
@@ -34,6 +38,7 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         ApplyFont();
+        _ = CalendarData.GetYearAsync(PersianDate.Year(DateTime.Today));   // warm the cache off the UI thread
         Flyout = new FlyoutWindow();   // created hidden; shown from the tray
         Tray = new TrayService();
 

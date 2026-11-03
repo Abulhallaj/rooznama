@@ -22,6 +22,7 @@ public sealed partial class CalendarPanel : UserControl
     int _y, _m;
     DateTime _selected = DateTime.Today;
     bool _large;
+    int _renderVer;   // lets a slow holiday lookup notice that the view has moved on
 
     int CellH => _large ? 64 : 40;
     int HeadH => _large ? 32 : 28;
@@ -45,6 +46,8 @@ public sealed partial class CalendarPanel : UserControl
     {
         ViewGrid.Height = HeadH + 6 * CellH;
         TodayBtn.Visibility = _large ? Visibility.Visible : Visibility.Collapsed;
+        // compact flyout: a fixed-height occasions area (the window height is measured once when it opens)
+        LowerGrid.Height = _large ? double.NaN : 110;
     }
 
     public void ShowToday(bool animate = false)
@@ -63,6 +66,7 @@ public sealed partial class CalendarPanel : UserControl
         ViewGrid.Children.Clear();
         ViewGrid.RowDefinitions.Clear();
         ViewGrid.ColumnDefinitions.Clear();
+        _renderVer++;
 
         switch (_mode)
         {
@@ -126,6 +130,7 @@ public sealed partial class CalendarPanel : UserControl
         int offset = ((int)first.DayOfWeek + 1) % 7;   // شنبه = 0
         var start = first.AddDays(-offset);
         var today = DateTime.Today;
+        var cells = new List<(Button Cell, DateTime Date)>();
 
         for (int i = 0; i < 42; i++)
         {
@@ -140,6 +145,26 @@ public sealed partial class CalendarPanel : UserControl
             Grid.SetRow(b, 1 + i / 7);
             Grid.SetColumn(b, i % 7);
             ViewGrid.Children.Add(b);
+            cells.Add((b, date));
+        }
+        _ = DecorateDaysAsync(_renderVer, cells);
+    }
+
+    // holidays turn red (like Friday) and every occasion is added to the hover text; runs after the year files are loaded
+    async Task DecorateDaysAsync(int ver, List<(Button Cell, DateTime Date)> cells)
+    {
+        var today = DateTime.Today;
+        foreach (var year in cells.Select(c => PersianDate.Year(c.Date)).Distinct().ToList())
+            await App.CalendarData.GetYearAsync(year);
+        if (ver != _renderVer) return;
+
+        foreach (var (cell, date) in cells)
+        {
+            var occ = await App.CalendarData.GetEventsForDateAsync(PersianDate.Key(date));
+            if (ver != _renderVer) return;
+            if (occ.Count == 0) continue;
+            if (date != today && occ.Any(o => o.IsHoliday)) cell.Foreground = new SolidColorBrush(Colors.IndianRed);
+            ToolTipService.SetToolTip(cell, new ToolTip { Content = DayInfo.Text(date, occ), FlowDirection = Loc.Flow });
         }
     }
 
@@ -326,8 +351,15 @@ public sealed partial class CalendarPanel : UserControl
     async Task LoadEventsAsync(DateTime day)
     {
         var list = await App.Events.GetEventsAsync(day, day.AddDays(1));
+        IReadOnlyList<CalendarItem> occ = PersianDate.InRange(day)
+            ? await App.CalendarData.GetEventsForDateAsync(PersianDate.Key(day))
+            : Array.Empty<CalendarItem>();
         if (day != _selected.Date) return;   // selection changed while loading
+
+        var (holidays, observances) = DayInfo.Split(occ);
+        HolidaysList.ItemsSource = holidays;
+        ObservancesList.ItemsSource = observances;
         EventsList.ItemsSource = list;
-        NoEvents.Visibility = list.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        NoEvents.Visibility = list.Count + holidays.Count + observances.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 }
