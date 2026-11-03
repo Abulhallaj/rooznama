@@ -8,6 +8,13 @@ Rooznama itself is released under the MIT License (see `LICENSE`). It uses or sh
 - License: SIL Open Font License 1.1 — https://openfontlicense.org
 - If you commit or redistribute the font files, also keep the `OFL.txt` that comes with the font release next to them (copy it to `Assets/Fonts/OFL.txt`). The font is not sold on its own and must keep its own name and license.
 
+## Iranian calendar data (bundled in `calendar/`)
+
+- Dataset: **FarsiUI Iranian calendar** (holidays and observances per Jalali year, `calendar/years/*` and `calendar/meta.json`) — https://github.com/MiladJoodi/FarsiUI/tree/main/calendar, documentation at https://farsiui.ir/calendar
+- Original source of the dates: the official calendar of the University of Tehran Calendar Center (https://calendar.ut.ac.ir)
+- License of the data: CC0 1.0 (see `calendar/meta.json`). Attribution is not required by that license; Rooznama credits FarsiUI voluntarily.
+- The JSON schema follows FarsiUI's. The files in this repository have been edited for Rooznama (record ids changed, data refreshed), so errors in them are Rooznama's, not FarsiUI's.
+
 ## Libraries
 
 | Component | Use | License |
