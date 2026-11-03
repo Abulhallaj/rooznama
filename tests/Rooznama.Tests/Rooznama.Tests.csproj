@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Rooznama.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.*" />
+    <PackageReference Include="xunit" Version="2.9.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*" />
+  </ItemGroup>
+
+  <!-- the data service has no WinUI dependency, so its sources are compiled straight into the tests -->
+  <ItemGroup>
+    <Compile Include="..\..\Services\CalendarEventModels.cs" Link="Linked\CalendarEventModels.cs" />
+    <Compile Include="..\..\Services\CalendarEventService.cs" Link="Linked\CalendarEventService.cs" />
+  </ItemGroup>
+
+  <!-- the real dataset, copied next to the test assembly as calendar\ -->
+  <ItemGroup>
+    <Content Include="..\..\calendar\meta.json" Link="calendar\meta.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\calendar\years\**\holidays.json" Link="calendar\years\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\calendar\years\**\events.json" Link="calendar\years\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
