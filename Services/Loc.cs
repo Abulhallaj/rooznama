@@ -20,6 +20,8 @@ public static class Loc
         ["exit"] = ("خروج", "Exit"),
 
         ["events"] = ("رویدادها", "Events"),
+        ["occ.holiday"] = ("تعطیل رسمی", "Official holiday"),
+        ["occ.observance"] = ("مناسبت", "Observance"),
         ["events.none"] = ("رویدادی برای این روز ثبت نشده است", "No events for this day"),
 
         ["conv.shamsi"] = ("تاریخ شمسی", "Shamsi (Jalali) date"),

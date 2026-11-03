@@ -34,5 +34,8 @@ public static class PersianDate
     public static string Full(DateTime d) =>
         $"{WeekdayName(d.DayOfWeek)} {Num(Day(d))} {MonthName(Month(d))} {Num(Year(d))}";
 
+    /// <summary>The calendar dataset's date key (YYYY-MM-DD, Latin digits) for a day.</summary>
+    public static string Key(DateTime d) => CalendarEventService.Key(Year(d), Month(d), Day(d));
+
     public static string Numeric(DateTime d) => Digits($"{Year(d):0000}/{Month(d):00}/{Day(d):00}");
 }
