@@ -4,6 +4,10 @@ All notable changes to **Rooznama (روزنما)** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+## [0.7.0] - 2026-11-03
+### Added
+- **Official holidays and observances** (Jalali years 1383-1405) from the bundled calendar dataset, based on FarsiUI's calendar data (credited in `THIRD-PARTY-NOTICES.md`). Holiday days turn red in the calendar, hovering a day lists its occasions, and the area under the calendar shows the selected day's holidays and observances separately. Works fully offline; the data ships in the `calendar` folder next to the exe.
+- `CalendarEventService` (loads and caches each year asynchronously; missing years, malformed JSON and unsupported schema versions are logged and skipped) and a `tests/Rooznama.Tests` xunit project.
 
 ## [0.6.2] - 2026-11-01
 ### Fixed
@@ -59,9 +63,8 @@ First public version: a Shamsi (Jalali) calendar for the Windows system tray, bu
 - The dark tray menu relies on undocumented `uxtheme.dll` entry points.
 - Loading fonts from the app folder in an unpackaged WinUI 3 app can be unreliable; installing Vazirmatn on Windows is the most reliable option.
 - Dates use .NET's arithmetic `PersianCalendar`, which can differ from the official calendar in some years.
-- Official holidays and occasions are not included yet.
+- Holidays and occasions exist for Jalali years 1383-1405 only. They are matched to days with .NET's `PersianCalendar`, so on days where it disagrees with the official calendar the occasion can land one day off.
 
 ### Planned
-- Official holidays and occasions from the University of Tehran Institute of Geophysics calendar, as a per-year JSON file with a user override.
 - Hijri/lunar dates in the day tooltip.
 - Google Calendar integration.

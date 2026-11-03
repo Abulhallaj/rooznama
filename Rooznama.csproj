@@ -27,6 +27,14 @@
     <Content Include="Assets\*.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- bundled offline calendar data (holidays + observances); sources/, rules/ and *.bak are not shipped -->
+  <ItemGroup>
+    <Content Include="calendar\meta.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="calendar\years\**\holidays.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="calendar\years\**\events.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Remove="tests\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.*" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.*" />
