@@ -17,6 +17,10 @@ public sealed class AppSettings
     public bool CheckUpdates { get; set; } = true;
     public DateTime LastUpdateCheckUtc { get; set; }
     public string LastNotifiedVersion { get; set; } = "";
+    public string HijriSource { get; set; } = "ut";       // ut (Tehran University Calendar Center) | umalqura; umalqura also fills any day ut has no data for
+    public bool ShowHijriInTooltip { get; set; } = true;  // Hijri date in the day hover text and the tray tooltip
+    public bool ShowHijriInCells { get; set; } = true;    // small Hijri day in the large calendar's cells
+    public bool ShowWeekNumbers { get; set; } = true;     // week-of-year column in the large calendar
 
     static string FilePath => Path.Combine(AppPaths.DataDir, "settings.json");
 
