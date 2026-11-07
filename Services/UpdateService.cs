@@ -75,7 +75,7 @@ public static class UpdateService
             var url = root.TryGetProperty("html_url", out var u) ? u.GetString() ?? AppInfo.ReleasesUrl : AppInfo.ReleasesUrl;
 
             MarkChecked();
-            if (TryParseTag(tag, out var latest) && latest > AppInfo.Version)
+            if (TryParseTag(tag, out var latest) && IsNewer(tag, latest))
             {
                 Available = new UpdateInfo(latest, tag, url);
                 return new CheckResult(true, Available);
@@ -94,6 +94,33 @@ public static class UpdateService
     {
         App.Settings.LastUpdateCheckUtc = DateTime.UtcNow;
         App.Settings.Save();
+    }
+
+    // 1.0.0 is newer than 1.0.0-beta.1 and beta.2 is newer than beta.1 (SemVer); a different number is decided by the number alone
+    static bool IsNewer(string tag, Version latest) =>
+        latest != AppInfo.Version ? latest > AppInfo.Version : ComparePre(PreRelease(tag), PreRelease(AppInfo.VersionText)) > 0;
+
+    static string PreRelease(string version)
+    {
+        var s = version.Trim().TrimStart('v', 'V').Split('+')[0];
+        int i = s.IndexOf('-');
+        return i < 0 ? "" : s[(i + 1)..];
+    }
+
+    static int ComparePre(string a, string b)
+    {
+        if (a == b) return 0;
+        if (a.Length == 0) return 1;     // a release is newer than any pre-release of the same version
+        if (b.Length == 0) return -1;
+        var pa = a.Split('.');
+        var pb = b.Split('.');
+        for (int i = 0; i < Math.Min(pa.Length, pb.Length); i++)
+        {
+            bool na = int.TryParse(pa[i], out int x), nb = int.TryParse(pb[i], out int y);
+            int c = na && nb ? x.CompareTo(y) : string.CompareOrdinal(pa[i], pb[i]);
+            if (c != 0) return c;
+        }
+        return pa.Length.CompareTo(pb.Length);
     }
 
     static bool TryParseTag(string tag, out Version v)
