@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "calendar": "hijri",
+  "description": "Year-independent fixed Hijri (qamari) official religious holidays. month 1 = Muharram ... 12 = Dhu al-Hijjah; day -1 = the last day of the month (29 or 30). Dates are resolved with the Hijri source chosen in settings. The yearly dataset wins whenever it lists the same occasion; aliases are the other names it uses for it.",
+  "items": [
+    {
+      "id": "tasua",
+      "month": 1,
+      "day": 9,
+      "title": { "fa": "تاسوعای حسینی", "en": "Tasua" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "ashura",
+      "month": 1,
+      "day": 10,
+      "title": { "fa": "عاشورای حسینی", "en": "Ashura" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "arbaeen",
+      "month": 2,
+      "day": 20,
+      "title": { "fa": "اربعین حسینی", "en": "Arbaeen" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "demise-prophet-imam-hassan",
+      "month": 2,
+      "day": 28,
+      "title": { "fa": "رحلت رسول اکرم؛ شهادت امام حسن مجتبی", "en": "Demise of the Prophet; Martyrdom of Imam Hassan" },
+      "isHoliday": true,
+      "categories": ["religious"],
+      "aliases": ["demise-prophet-martyrdom-imam-hasan"]
+    },
+    {
+      "id": "martyrdom-imam-reza",
+      "month": 2,
+      "day": -1,
+      "title": { "fa": "شهادت امام رضا", "en": "Martyrdom of Imam Reza" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "martyrdom-imam-askari",
+      "month": 3,
+      "day": 8,
+      "title": { "fa": "شهادت امام حسن عسکری و آغاز امامت حضرت ولی‌عصر", "en": "Martyrdom of Imam Askari; Beginning of the Imamate of the Mahdi" },
+      "isHoliday": true,
+      "categories": ["religious"],
+      "aliases": ["martyrdom-imam-hasan-askari"]
+    },
+    {
+      "id": "birthday-prophet-imam-sadiq",
+      "month": 3,
+      "day": 17,
+      "title": { "fa": "میلاد رسول اکرم و امام جعفر صادق", "en": "Birthday of the Prophet and Imam Sadiq" },
+      "isHoliday": true,
+      "categories": ["religious"],
+      "aliases": ["mawlid-prophet", "birthday-imam-sadiq"]
+    },
+    {
+      "id": "martyrdom-fatimah",
+      "month": 6,
+      "day": 3,
+      "title": { "fa": "شهادت حضرت فاطمه زهرا", "en": "Martyrdom of Fatimah" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "birthday-imam-ali",
+      "month": 7,
+      "day": 13,
+      "title": { "fa": "ولادت امام علی و روز پدر", "en": "Birthday of Imam Ali" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "mabath",
+      "month": 7,
+      "day": 27,
+      "title": { "fa": "مبعث رسول اکرم", "en": "Mab'ath" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "mid-shaaban",
+      "month": 8,
+      "day": 15,
+      "title": { "fa": "ولادت حضرت قائم و جشن نیمه شعبان", "en": "Mid-Sha'ban" },
+      "isHoliday": true,
+      "categories": ["religious"],
+      "aliases": ["mid-shaban"]
+    },
+    {
+      "id": "martyrdom-imam-ali",
+      "month": 9,
+      "day": 21,
+      "title": { "fa": "شهادت حضرت علی", "en": "Martyrdom of Imam Ali" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "eid-fitr",
+      "month": 10,
+      "day": 1,
+      "title": { "fa": "عید سعید فطر", "en": "Eid al-Fitr" },
+      "isHoliday": true,
+      "categories": ["religious"],
+      "aliases": ["eid-fitr-1"]
+    },
+    {
+      "id": "eid-fitr-2",
+      "month": 10,
+      "day": 2,
+      "title": { "fa": "تعطیل به مناسبت عید سعید فطر", "en": "Holiday for Eid al-Fitr" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "martyrdom-imam-sadiq",
+      "month": 10,
+      "day": 25,
+      "title": { "fa": "شهادت امام جعفر صادق", "en": "Martyrdom of Imam Sadiq" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "eid-adha",
+      "month": 12,
+      "day": 10,
+      "title": { "fa": "عید سعید قربان", "en": "Eid al-Adha" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    },
+    {
+      "id": "eid-ghadir",
+      "month": 12,
+      "day": 18,
+      "title": { "fa": "عید سعید غدیر خم", "en": "Eid al-Ghadir" },
+      "isHoliday": true,
+      "categories": ["religious"]
+    }
+  ]
+}

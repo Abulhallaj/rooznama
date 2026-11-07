@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "calendar": "gregorian",
+  "description": "Year-independent fixed Gregorian observances (month/day of the Gregorian calendar). They fill in wherever the yearly dataset has no record of the same title on that day.",
+  "items": [
+    {
+      "id": "new-year",
+      "month": 1,
+      "day": 1,
+      "title": { "fa": "جشن آغاز سال نو میلادی", "en": "New Year's Day" },
+      "isHoliday": false,
+      "categories": ["international"]
+    },
+    {
+      "id": "womens-day",
+      "month": 3,
+      "day": 8,
+      "title": { "fa": "روز جهانی زنان", "en": "International Women's Day" },
+      "isHoliday": false,
+      "categories": ["international"]
+    },
+    {
+      "id": "peace-day",
+      "month": 9,
+      "day": 21,
+      "title": { "fa": "روز جهانی صلح", "en": "International Day of Peace" },
+      "isHoliday": false,
+      "categories": ["international"]
+    },
+    {
+      "id": "christmas",
+      "month": 12,
+      "day": 25,
+      "title": { "fa": "جشن کریسمس", "en": "Christmas" },
+      "isHoliday": false,
+      "categories": ["international"]
+    }
+  ]
+}
