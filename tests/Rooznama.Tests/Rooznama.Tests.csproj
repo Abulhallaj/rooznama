@@ -18,6 +18,12 @@
   <ItemGroup>
     <Compile Include="..\..\Services\CalendarEventModels.cs" Link="Linked\CalendarEventModels.cs" />
     <Compile Include="..\..\Services\CalendarEventService.cs" Link="Linked\CalendarEventService.cs" />
+    <Compile Include="..\..\Services\HijriDate.cs" Link="Linked\HijriDate.cs" />
+    <Compile Include="..\..\Services\HijriSources.cs" Link="Linked\HijriSources.cs" />
+    <Compile Include="..\..\Services\CalendarRules.cs" Link="Linked\CalendarRules.cs" />
+    <Compile Include="..\..\Services\CalendarOccasions.cs" Link="Linked\CalendarOccasions.cs" />
+    <Compile Include="..\..\Services\WeekNumbers.cs" Link="Linked\WeekNumbers.cs" />
+    <Compile Include="..\..\Services\PersonalEvents.cs" Link="Linked\PersonalEvents.cs" />
   </ItemGroup>
 
   <!-- the real dataset, copied next to the test assembly as calendar\ -->
@@ -25,6 +31,8 @@
     <Content Include="..\..\calendar\meta.json" Link="calendar\meta.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\calendar\years\**\holidays.json" Link="calendar\years\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\calendar\years\**\events.json" Link="calendar\years\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\calendar\rules\*.json" Link="calendar\rules\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\calendar\hijri\ut.json" Link="calendar\hijri\ut.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
