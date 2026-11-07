@@ -1,10 +1,12 @@
 using System.Globalization;
 using System.Numerics;
 using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Rooznama.Services;
 
@@ -38,6 +40,11 @@ public sealed partial class CalendarPanel : UserControl
     {
         InitializeComponent();
         ElementCompositionPreview.SetIsTranslationEnabled(ViewGrid, true);
+        IsTabStop = true;                                   // the arrow keys move the selected day
+        FocusVisualPrimaryThickness = new Thickness(0);
+        FocusVisualSecondaryThickness = new Thickness(0);
+        KeyDown += Panel_KeyDown;
+        Loaded += (_, _) => { if (_large) FocusSelected(false); };
         ApplyMode();
         ShowToday();
     }
@@ -46,6 +53,7 @@ public sealed partial class CalendarPanel : UserControl
     {
         ViewGrid.Height = HeadH + 6 * CellH;
         TodayBtn.Visibility = _large ? Visibility.Visible : Visibility.Collapsed;
+        AddEventBtn.Visibility = _large ? Visibility.Visible : Visibility.Collapsed;
         // compact flyout: a fixed-height occasions area (the window height is measured once when it opens)
         LowerGrid.Height = _large ? double.NaN : 110;
     }
@@ -105,6 +113,10 @@ public sealed partial class CalendarPanel : UserControl
     {
         TitleText.Text = $"{PersianDate.MonthName(_m)} {PersianDate.Num(_y)}";
 
+        // large calendar: a week-of-year column in front of the first (Saturday) column
+        bool weeks = _large && App.Settings.ShowWeekNumbers;
+        int c0 = weeks ? 1 : 0;
+        if (weeks) ViewGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(44) });
         for (int c = 0; c < 7; c++) ViewGrid.ColumnDefinitions.Add(new ColumnDefinition());
         ViewGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(HeadH) });
         for (int r = 0; r < 6; r++) ViewGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(CellH) });
@@ -121,8 +133,21 @@ public sealed partial class CalendarPanel : UserControl
                 Opacity = 0.7
             };
             if (c == 6) t.Foreground = new SolidColorBrush(Colors.IndianRed);
-            Grid.SetColumn(t, c);
+            Grid.SetColumn(t, c + c0);
             ViewGrid.Children.Add(t);
+        }
+        if (weeks)
+        {
+            var wh = new TextBlock
+            {
+                Text = Loc.T("week"),
+                FontSize = 11,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Opacity = 0.5
+            };
+            Grid.SetColumn(wh, 0);
+            ViewGrid.Children.Add(wh);
         }
 
         // always 6 full weeks: the tail of the previous month and the head of the next are shown dimmed
@@ -143,10 +168,29 @@ public sealed partial class CalendarPanel : UserControl
             ToolTipService.SetToolTip(b, new ToolTip { Content = DayInfo.Text(date), FlowDirection = Loc.Flow });
             Mark(b, accent: date == today, selected: date == _selected.Date, red: i % 7 == 6, dim: !inMonth);
             Grid.SetRow(b, 1 + i / 7);
-            Grid.SetColumn(b, i % 7);
+            Grid.SetColumn(b, i % 7 + c0);
             ViewGrid.Children.Add(b);
             cells.Add((b, date));
         }
+        if (weeks)
+            for (int r = 0; r < 6; r++)
+            {
+                var weekStart = start.AddDays(r * 7);   // every row starts on a Saturday
+                if (!PersianDate.InRange(weekStart) || !PersianDate.InRange(weekStart.AddDays(6))) continue;
+                int n = WeekNumbers.Of(weekStart);
+                if (n <= 0) continue;
+                var wt = new TextBlock
+                {
+                    Text = PersianDate.Num(n),
+                    FontSize = 12,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Opacity = 0.5
+                };
+                Grid.SetRow(wt, 1 + r);
+                Grid.SetColumn(wt, 0);
+                ViewGrid.Children.Add(wt);
+            }
         _ = DecorateDaysAsync(_renderVer, cells);
     }
 
@@ -160,7 +204,7 @@ public sealed partial class CalendarPanel : UserControl
 
         foreach (var (cell, date) in cells)
         {
-            var occ = await App.CalendarData.GetEventsForDateAsync(PersianDate.Key(date));
+            var occ = await App.Occasions.GetForDateAsync(date);
             if (ver != _renderVer) return;
             if (occ.Count == 0) continue;
             if (date != today && occ.Any(o => o.IsHoliday)) cell.Foreground = new SolidColorBrush(Colors.IndianRed);
@@ -229,14 +273,22 @@ public sealed partial class CalendarPanel : UserControl
             FontWeight = FontWeights.SemiBold,
             HorizontalAlignment = HorizontalAlignment.Center
         });
-        sp.Children.Add(new TextBlock
+        var sub = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, HorizontalAlignment = HorizontalAlignment.Center };
+        sub.Children.Add(new TextBlock
         {
             Text = date.Day == 1 ? date.ToString("d MMM", CultureInfo.InvariantCulture)
                                  : date.Day.ToString(CultureInfo.InvariantCulture),
             FontSize = 11,
-            Opacity = 0.65,
-            HorizontalAlignment = HorizontalAlignment.Center
+            Opacity = 0.65
         });
+        if (App.Settings.ShowHijriInCells && HijriService.Get(date) is { } h)
+            sub.Children.Add(new TextBlock
+            {
+                Text = h.Day == 1 ? HijriService.MonthName(h.Month) : HijriService.Num(h.Day),   // Arabic digits
+                FontSize = 11,
+                Opacity = 0.65
+            });
+        sp.Children.Add(sub);
         b.Content = sp;
         b.Click += Cell_Click;
         return b;
@@ -348,11 +400,93 @@ public sealed partial class CalendarPanel : UserControl
         Render(dir, true);
     }
 
+    // ---------- keyboard ----------
+    // ← → one day · ↑ ↓ one week · PageUp / PageDown one month. In Persian the calendar is right-to-left,
+    // so the cell on the right is the previous day.
+    void Panel_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (_mode != Mode.Days) return;
+        int days = e.Key switch
+        {
+            Windows.System.VirtualKey.Right => Loc.IsFa ? -1 : 1,
+            Windows.System.VirtualKey.Left => Loc.IsFa ? 1 : -1,
+            Windows.System.VirtualKey.Up => -7,
+            Windows.System.VirtualKey.Down => 7,
+            _ => 0
+        };
+        if (days != 0) { MoveSelection(days); e.Handled = true; }
+        else if (e.Key == Windows.System.VirtualKey.PageUp) { ShiftMonth(-1); e.Handled = true; }
+        else if (e.Key == Windows.System.VirtualKey.PageDown) { ShiftMonth(+1); e.Handled = true; }
+    }
+
+    void MoveSelection(int days)
+    {
+        var d = _selected.Date.AddDays(days);
+        if (!PersianDate.InRange(d) || PersianDate.Year(d) < 1 || PersianDate.Year(d) > MaxYear) return;
+
+        int dir = 0;
+        if (PersianDate.Month(d) != _m || PersianDate.Year(d) != _y)   // moved into a neighbouring month
+        {
+            dir = d < PersianDate.ToGregorian(_y, _m, 1) ? -1 : 1;
+            _y = PersianDate.Year(d);
+            _m = PersianDate.Month(d);
+        }
+        _selected = d;
+        Render(dir, dir != 0);
+        FocusSelected(true);
+    }
+
+    void ShiftMonth(int dir)
+    {
+        int y = _y, m = _m + dir;
+        if (m > 12) { m = 1; y++; }
+        if (m < 1) { m = 12; y--; }
+        if (y < 1 || y > MaxYear) return;
+
+        _y = y;
+        _m = m;
+        _selected = PersianDate.ToGregorian(y, m, Math.Min(PersianDate.Day(_selected), PersianDate.DaysInMonth(y, m)));
+        Render(dir, true);
+        FocusSelected(true);
+    }
+
+    // the day buttons are rebuilt on every render, so focus goes back to the selected one afterwards
+    void FocusSelected(bool keyboard)
+    {
+        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            foreach (var child in ViewGrid.Children)
+                if (child is Button { Tag: DateTime d } b && d == _selected.Date)
+                {
+                    b.Focus(keyboard ? FocusState.Keyboard : FocusState.Programmatic);
+                    return;
+                }
+            Focus(FocusState.Programmatic);
+        });
+    }
+
+    // ---------- personal events ----------
+    async void AddEvent_Click(object sender, RoutedEventArgs e) => await EditEventAsync(null);
+
+    async void Event_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (!_large) return;   // the dialog needs the main window (the tray flyout closes when it loses focus)
+        if (e.ClickedItem is CalendarEvent { IsReadOnly: false, Id: { } id } && App.PersonalEvents.Get(id) is { } existing)
+            await EditEventAsync(existing);
+    }
+
+    async Task EditEventAsync(PersonalEvent? existing)
+    {
+        if (XamlRoot is null) return;
+        var outcome = await PersonalEventDialog.ShowAsync(XamlRoot, existing, _selected);
+        if (outcome != PersonalEventDialog.Outcome.Cancelled) await LoadEventsAsync(_selected.Date);
+    }
+
     async Task LoadEventsAsync(DateTime day)
     {
         var list = await App.Events.GetEventsAsync(day, day.AddDays(1));
         IReadOnlyList<CalendarItem> occ = PersianDate.InRange(day)
-            ? await App.CalendarData.GetEventsForDateAsync(PersianDate.Key(day))
+            ? await App.Occasions.GetForDateAsync(day)
             : Array.Empty<CalendarItem>();
         if (day != _selected.Date) return;   // selection changed while loading
 

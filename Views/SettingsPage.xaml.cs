@@ -18,6 +18,10 @@ public sealed partial class SettingsPage : Page
         StartupSwitch.IsOn = s.StartWithWindows;
         CustomTipSwitch.IsOn = s.CustomTooltip;
         UpdatesSwitch.IsOn = s.CheckUpdates;
+        HijriTipSwitch.IsOn = s.ShowHijriInTooltip;
+        HijriCellsSwitch.IsOn = s.ShowHijriInCells;
+        WeeksSwitch.IsOn = s.ShowWeekNumbers;
+        Select(HijriSourceBox, s.HijriSource);
         Select(ColorBox, s.IconColor);
         Select(LangBox, s.Language);
         Select(FontBox, s.FontName);
@@ -34,6 +38,7 @@ public sealed partial class SettingsPage : Page
 
     void Option_Toggled(object sender, RoutedEventArgs e) => Apply();
     void Color_Changed(object sender, SelectionChangedEventArgs e) => Apply();
+    void Option_Changed(object sender, SelectionChangedEventArgs e) => Apply();
 
     // language, font and theme need a restart (resources are resolved when windows are created)
     void Appearance_Changed(object sender, SelectionChangedEventArgs e)
@@ -60,6 +65,10 @@ public sealed partial class SettingsPage : Page
         s.CustomTooltip = CustomTipSwitch.IsOn;
         s.CheckUpdates = UpdatesSwitch.IsOn;
         s.IconColor = TagOf(ColorBox, s.IconColor);
+        s.HijriSource = TagOf(HijriSourceBox, s.HijriSource);
+        s.ShowHijriInTooltip = HijriTipSwitch.IsOn;
+        s.ShowHijriInCells = HijriCellsSwitch.IsOn;
+        s.ShowWeekNumbers = WeeksSwitch.IsOn;
 
         s.Save();
         s.ApplyStartup();

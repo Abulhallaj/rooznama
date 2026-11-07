@@ -13,12 +13,19 @@ public partial class App : Application
 
     public static AppSettings Settings { get; } = AppSettings.Load();
 
-    // Swap this later for a Google Calendar (or other) provider.
-    public static ICalendarEventProvider Events { get; set; } = new NullEventProvider();
+    // Personal events (a JSON file next to settings.json). Events is the provider the calendar reads;
+    // swap or combine it later with a Google Calendar provider, nothing else has to change.
+    public static PersonalEventStore PersonalEvents { get; } = new(Path.Combine(AppPaths.DataDir, "personal-events.json"), Log.Write);
+    public static ICalendarEventProvider Events { get; set; } = new PersonalEventProvider(PersonalEvents);
 
     // Bundled offline holidays and observances (calendar\ next to the exe).
     public static CalendarEventService CalendarData { get; } =
         new(Path.Combine(AppContext.BaseDirectory, "calendar"), Log.Write);
+
+    // Fixed rules per calendar (calendar\rules) merged with the yearly dataset; Hijri dates follow the selected source.
+    public static CalendarRuleSet CalendarRules { get; } =
+        CalendarRuleSet.Load(Path.Combine(AppContext.BaseDirectory, "calendar", "rules"), Log.Write);
+    public static CalendarOccasionService Occasions { get; } = new(CalendarData, CalendarRules, HijriService.Provider);
 
     public static FlyoutWindow Flyout { get; private set; } = null!;
     public static TrayService Tray { get; private set; } = null!;

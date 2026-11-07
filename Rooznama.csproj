@@ -27,11 +27,13 @@
     <Content Include="Assets\*.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- bundled offline calendar data (holidays + observances); sources/, rules/ and *.bak are not shipped -->
+  <!-- bundled offline calendar data (holidays + observances); sources/ and *.bak are not shipped -->
   <ItemGroup>
     <Content Include="calendar\meta.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="calendar\years\**\holidays.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="calendar\years\**\events.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="calendar\rules\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="calendar\hijri\ut.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Remove="tests\**" />
   </ItemGroup>
 

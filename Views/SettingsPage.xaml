@@ -105,6 +105,49 @@
                 </StackPanel>
             </Border>
 
+            <!-- Calendar: Hijri source, display options -->
+            <Border Padding="16" CornerRadius="8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="{x:Bind svc:Loc.T('set.cal')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                    <ComboBox x:Name="HijriSourceBox" HorizontalAlignment="Stretch"
+                              Header="{x:Bind svc:Loc.T('set.hijri.source')}" SelectionChanged="Option_Changed">
+                        <ComboBoxItem Content="{x:Bind svc:Loc.T('hijri.ut')}" Tag="ut"/>
+                        <ComboBoxItem Content="{x:Bind svc:Loc.T('hijri.umalqura')}" Tag="umalqura"/>
+                    </ComboBox>
+                    <TextBlock Text="{x:Bind svc:Loc.T('set.hijri.note')}" TextWrapping="Wrap" Opacity="0.6" FontSize="12"/>
+                    <Grid ColumnSpacing="16" RowSpacing="14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
+                            <TextBlock Text="{x:Bind svc:Loc.T('set.hijri.tip')}" TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="HijriTipSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
+                                          OffContent="{x:Bind svc:Loc.T('off')}" Toggled="Option_Toggled"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
+                            <TextBlock Text="{x:Bind svc:Loc.T('set.hijri.cells')}" TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="HijriCellsSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
+                                          OffContent="{x:Bind svc:Loc.T('off')}" Toggled="Option_Toggled"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
+                            <TextBlock Text="{x:Bind svc:Loc.T('set.weeks')}" TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="WeeksSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
+                                          OffContent="{x:Bind svc:Loc.T('off')}" Toggled="Option_Toggled"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Updates -->
             <Border Padding="16" CornerRadius="8"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
