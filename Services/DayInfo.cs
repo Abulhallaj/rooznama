@@ -5,7 +5,7 @@ namespace Rooznama.Services;
 /// <summary>A holiday or observance line shown under the calendar.</summary>
 public sealed record OccasionRow(string Text, string Caption);
 
-/// <summary>Extra info shown when hovering a day. Add more lines (Hijri / lunar) in Lines().</summary>
+/// <summary>Extra info shown when hovering a day: Gregorian and Hijri dates, then the day's occasions.</summary>
 public static class DayInfo
 {
     public static string Text(DateTime d) => string.Join("\n", Lines(d));
@@ -17,7 +17,7 @@ public static class DayInfo
     public static IEnumerable<string> Lines(DateTime d)
     {
         yield return d.ToString("dddd, d MMMM yyyy", CultureInfo.InvariantCulture);
-        // later: yield return Hijri(d);
+        if (App.Settings.ShowHijriInTooltip && HijriService.Get(d) is { } h) yield return HijriService.Full(h);
     }
 
     /// <summary>Persian title; in English mode the English one when the dataset has it.</summary>
@@ -26,6 +26,10 @@ public static class DayInfo
 
     /// <summary>Official holidays and the other observances of a day, kept as two separate lists.</summary>
     public static (IReadOnlyList<OccasionRow> Holidays, IReadOnlyList<OccasionRow> Observances) Split(IReadOnlyList<CalendarItem> items) =>
-        (items.Where(i => i.IsHoliday).Select(i => new OccasionRow(Title(i), Loc.T("occ.holiday"))).ToList(),
-         items.Where(i => !i.IsHoliday).Select(i => new OccasionRow(Title(i), Loc.T("occ.observance"))).ToList());
+        (items.Where(i => i.IsHoliday).Select(i => new OccasionRow(Title(i), Caption(i, "occ.holiday"))).ToList(),
+         items.Where(i => !i.IsHoliday).Select(i => new OccasionRow(Title(i), Caption(i, "occ.observance"))).ToList());
+
+    // a Hijri date that did not come from the official Iranian data may be off by a day
+    static string Caption(CalendarItem i, string key) =>
+        i.Categories.Contains("approximate") ? $"{Loc.T(key)} · {Loc.T("occ.approx")}" : Loc.T(key);
 }
