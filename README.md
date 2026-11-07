@@ -91,7 +91,9 @@ Rooznama shows the Shamsi (Jalali) day number on a system-tray icon. Hover for t
 - Calendar flyout next to the tray: acrylic background, animations, day / month / year views, dimmed days of adjacent months, Gregorian date on hover
 - Main window: large calendar with the Gregorian day beside each day, Shamsi ↔ Gregorian converter, settings, about
 - Persian (default) and English, Vazirmatn font, automatic / light / dark theme
-- Official holidays and observances for 1383–1405, offline (data based on the [FarsiUI calendar](https://farsiui.ir/calendar))
+- Official holidays and observances for 1383–1405, offline (data based on the [FarsiUI calendar](https://farsiui.ir/calendar)); fixed occasions per calendar (Shamsi, Hijri, Gregorian) fill in for later years
+- Hijri dates (Arabic digits) from the official Tehran University calendars or Umm al-Qura, selectable in Settings
+- Week numbers, arrow-key navigation, and personal events (all-day or timed, optional yearly repeat) in the main window
 - Optional start with Windows
 
 ### Download
@@ -140,16 +142,21 @@ ShellWindow              main window (navigation)
 Views/                   CalendarPanel, CalendarPage, ConverterPage, SettingsPage, SupportPage, AboutPage
 Services/                TrayService (Shell_NotifyIcon), PersianDate, Loc (fa/en), AppSettings,
                          UpdateService, AppInfo, AppPaths, DayInfo, CalendarEvents (provider hook),
-                         CalendarEventService + CalendarEventModels (holidays/observances), Log
-calendar/                bundled holidays and observances (JSON, copied next to the exe)
-tests/                   xunit tests for the calendar data service
+                         CalendarEventService + CalendarEventModels (holidays/observances),
+                         CalendarRules + CalendarOccasions (fixed rules, merge, audit), HijriService + HijriSources,
+                         WeekNumbers, PersonalEvents + PersonalEventProvider, Log
+calendar/                bundled holidays, observances, fixed rules and Hijri data (JSON, copied next to the exe); see calendar/RULES.md
+tests/                   xunit tests for the calendar data, rules, Hijri sources, week numbers and personal events
 TipWindow                right-to-left tray tooltip
 installer/               Inno Setup script (used by CI)
 Assets/                  icons, fonts
 ```
 
 ### Roadmap
-Hijri/lunar dates, Google Calendar integration, online updates of the occasions data.
+Google Calendar integration (the personal event model is ready for it), an active-calendar switch (Gregorian / Hijri), online updates of the occasions data.
 
+Android and iOS Application
+
+WearOS Application
 ### License
 [MIT](LICENSE). Third-party components: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

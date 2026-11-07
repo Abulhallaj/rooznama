@@ -4,6 +4,30 @@ All notable changes to **Rooznama (روزنما)** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+
+## [1.0.0-beta.1] - 2026-11-05
+First beta of 1.0: the Hijri calendar, fixed occasions per calendar, week numbers, keyboard navigation and personal events.
+
+### Added
+- **Hijri (qamari) dates.** Shown in the day hover text and the tray tooltip (Settings: "Show the Hijri date in tooltips") and as a small day in the large calendar's cells, with the month name on the 1st (Settings: "Show the Hijri day in calendar cells"). Hijri numbers use **Arabic digits** (٠١٢٣…), not Persian ones.
+- **Hijri source choice** in Settings > Calendar: *Tehran University Calendar Center* (official Iranian dates, `calendar/hijri/ut.json`) or *Umm al-Qura* (`UmAlQuraCalendar`). **Umm al-Qura is used automatically for any day the selected source does not cover**, so every date always has a Hijri date. `calendar/sources/extract-hijri-anchors.mjs` builds the official data from the Tehran University yearly calendars; 
+- **Fixed occasions per calendar**: `calendar/rules/fixed-jalali.json` (existing), new `fixed-hijri.json` (the 17 official religious holidays, `day: -1` = last day of the month for the martyrdom of Imam Reza) and `fixed-gregorian.json` (New Year's Day, 8 March, 21 September, Christmas). They fill in wherever the yearly dataset has nothing, for example Nowruz and the religious holidays of 1406 onwards; Hijri dates not taken from the official data are labelled *approximate*. The yearly dataset always wins and nothing is listed twice. See `calendar/RULES.md`.
+- **Rules vs. dataset comparison** (`CalendarRuleAudit`, run by the tests): for every year the official Hijri data covers, all fixed rules agree with the dataset. The only differences are in 1384, where the dataset places Arbaeen and Eid al-Adha one day before the official qamari date.
+- **Week numbers** in a column before the first (Saturday) column of the large calendar, by the Iranian rule (the week with 1 Farvardin is week 1, weeks start on Saturday). Turn it off in Settings. The calculation takes the calendar as a parameter so Gregorian or Hijri weeks can follow an active-calendar switch later.
+- **Keyboard navigation** in the large calendar: arrow keys move the selected day (←/→ one day, ↑/↓ one week, in the direction of the right-to-left grid; the next or previous month opens by itself), PageUp/PageDown change the month. The calendar takes focus when it opens.
+- **Personal events**: add, edit and delete from the large calendar ("Add event"; click an event to edit it). All-day or timed, with notes, and optional yearly repetition by the Shamsi, Hijri or Gregorian date. They are stored in `personal-events.json` next to `settings.json` (written atomically; a damaged file is kept as `.bad`; a file from a newer version is never overwritten). The model already carries what Google Calendar needs (remote id, etag, sync state, Gregorian wall-clock times with all-day = exclusive end, RRULE for Gregorian yearly events, deletion tombstones), so a Google provider only has to connect and translate.
+- Tests for the Hijri sources, the rules and their linking to the dataset, the occasion merge, the audit, week numbers and the personal event store.
+
+### Changed
+- `CalendarEvent` gained `Id`, `Source`, `IsAllDay`, `IsReadOnly`, `Repeats` and `Description`; `App.Events` now defaults to the personal events provider (`ICalendarEventProvider` is unchanged).
+- Occasions come from `CalendarOccasionService` (yearly dataset + fixed rules) instead of `CalendarEventService` directly.
+- `calendar/rules` and `calendar/hijri` are now shipped with the app; `calendar/schema.json` describes the rule calendars, `aliases`, `day: -1` and the Hijri month starts.
+- The update check understands pre-release versions: 1.0.0 is newer than 1.0.0-beta.1, beta.2 is newer than beta.1.
+
+### Notes
+- Hijri dates after the last official calendar (currently 20 March 2027) come from Umm al-Qura and can differ from Iran's official calendar by a day.
+- Months 1405+ of the dataset are unchanged; nothing was regenerated from the PDFs.
+
 ## [0.7.0] - 2026-11-03
 ### Added
 - **Official holidays and observances** (Jalali years 1383-1405) from the bundled calendar dataset, based on FarsiUI's calendar data (credited in `THIRD-PARTY-NOTICES.md`). Holiday days turn red in the calendar, hovering a day lists its occasions, and the area under the calendar shows the selected day's holidays and observances separately. Works fully offline; the data ships in the `calendar` folder next to the exe.
