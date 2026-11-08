@@ -5,12 +5,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## Unreleased
 
+### Added
+- **Google Calendar sync** for the personal events (Settings > Google Calendar). Sign-in uses the system browser with a loopback redirect and PKCE; the refresh token is stored encrypted for the current Windows user (DPAPI), never in `settings.json`. Needs an OAuth client of type *Desktop app* from your own Google Cloud project (Client ID and secret are entered in Settings, or shipped as `google-client.json` next to the exe); the requested access is `calendar.events` plus the account's e-mail address for display.
+- **Two-way sync with the primary calendar** over a window of one year back to two years ahead, every 15 minutes, a few seconds after an edit, and on demand ("Sync now"): new and edited events are sent, deletions are sent, events made at Google (and their edits and deletions) come in and are shown as *Google* events, editable here. A Gregorian yearly event is kept at Google as one event with an RRULE; a Shamsi or Hijri yearly event is sent as one event per year in the window (Google cannot repeat by those calendars). A step that fails stays pending and is retried; an event half-sent when the connection dropped is recognised by a private marker instead of being duplicated; if more than half of the synced events suddenly look deleted at Google, nothing is removed here.
+- Connecting a different Google account than before forgets the old account's links (its imported events are removed, everything made here is sent again as new). Disconnecting keeps all events.
+- The event model gained `origin`, `recurringEventId` and `remoteInstances` (additive; older `personal-events.json` files load unchanged) and the store gained `Pending`, `ApplySync`, `Import`, `Purge`, `ResetRemoteLinks` and an `Edited` event next to `Changed`.
+- Tests for the Google event mapping, the HTTP client (paging, token renewal, retries) and the whole sync (against an in-memory fake Google), plus the new store operations.
+
+### Notes
+- connect once with a test account and check Settings > Google Calendar and `rooznama.log`.
+- While the Google Cloud project is in *Testing* mode only the test users you add can sign in, and Google expires their refresh tokens after 7 days. Publishing for everyone needs Google's verification of the `calendar.events` scope.
+
 ## [1.0.0-beta.1] - 2026-11-05
 First beta of 1.0: the Hijri calendar, fixed occasions per calendar, week numbers, keyboard navigation and personal events.
 
 ### Added
 - **Hijri (qamari) dates.** Shown in the day hover text and the tray tooltip (Settings: "Show the Hijri date in tooltips") and as a small day in the large calendar's cells, with the month name on the 1st (Settings: "Show the Hijri day in calendar cells"). Hijri numbers use **Arabic digits** (٠١٢٣…), not Persian ones.
-- **Hijri source choice** in Settings > Calendar: *Tehran University Calendar Center* (official Iranian dates, `calendar/hijri/ut.json`) or *Umm al-Qura* (`UmAlQuraCalendar`). **Umm al-Qura is used automatically for any day the selected source does not cover**, so every date always has a Hijri date. `calendar/sources/extract-hijri-anchors.mjs` builds the official data from the Tehran University yearly calendars; 
+- **Hijri source choice** in Settings > Calendar: *Tehran University Calendar Center* (official Iranian dates, `calendar/hijri/ut.json`) or *Umm al-Qura* (`UmAlQuraCalendar`). **Umm al-Qura is used automatically for any day the selected source does not cover**, so every date always has a Hijri date. `calendar/sources/extract-hijri-anchors.mjs` builds the official data from the Tehran University yearly calendars; it ships with 12 verified Jalali years (1384, 1391, 1393, 1395, 1397-1401, 1403-1405). Years whose text fails the checks are skipped, and five unreadable rows were repaired where the neighbouring Hijri days force the value (`repairedDays`). Adding a year only needs its `Calendar-<year>.norm.txt` and a re-run.
 - **Fixed occasions per calendar**: `calendar/rules/fixed-jalali.json` (existing), new `fixed-hijri.json` (the 17 official religious holidays, `day: -1` = last day of the month for the martyrdom of Imam Reza) and `fixed-gregorian.json` (New Year's Day, 8 March, 21 September, Christmas). They fill in wherever the yearly dataset has nothing, for example Nowruz and the religious holidays of 1406 onwards; Hijri dates not taken from the official data are labelled *approximate*. The yearly dataset always wins and nothing is listed twice. See `calendar/RULES.md`.
 - **Rules vs. dataset comparison** (`CalendarRuleAudit`, run by the tests): for every year the official Hijri data covers, all fixed rules agree with the dataset. The only differences are in 1384, where the dataset places Arbaeen and Eid al-Adha one day before the official qamari date.
 - **Week numbers** in a column before the first (Saturday) column of the large calendar, by the Iranian rule (the week with 1 Farvardin is week 1, weeks start on Saturday). Turn it off in Settings. The calculation takes the calendar as a parameter so Gregorian or Hijri weeks can follow an active-calendar switch later.
@@ -25,6 +36,7 @@ First beta of 1.0: the Hijri calendar, fixed occasions per calendar, week number
 - The update check understands pre-release versions: 1.0.0 is newer than 1.0.0-beta.1, beta.2 is newer than beta.1.
 
 ### Notes
+- Beta: publish it as a GitHub *pre-release*, since "latest release" is what the in-app update check reads.
 - Hijri dates after the last official calendar (currently 20 March 2027) come from Umm al-Qura and can differ from Iran's official calendar by a day.
 - Months 1405+ of the dataset are unchanged; nothing was regenerated from the PDFs.
 

@@ -35,7 +35,18 @@
 - پنجره اصلی: تقویم بزرگ با روز میلادی کنار هر روز، مبدل تاریخ شمسی ↔ میلادی، تنظیمات، درباره
 - فارسی (پیش‌فرض) و انگلیسی، فونت وزیرمتن، تم خودکار / روشن / تیره
 - تعطیلات رسمی و مناسبت‌ها (۱۳۸۳ تا ۱۴۰۵، آفلاین؛ داده‌ها بر پایه‌ی سایت رسمی مرکز تقویم دانشگاه تهران. ساختار رویدادها از [تقویم FarsiUI](https://farsiui.ir/calendar)) وام گرفته شده است.
+- تاریخ قمری (با ارقام عربی) از تقویم رسمی مرکز تقویم دانشگاه تهران یا ام‌القری (قابل انتخاب)؛ مناسبت‌های ثابت هر تقویم (شمسی، قمری، میلادی) برای سال‌های بعد از ۱۴۰۵ جایگزین می‌شوند
+- شماره هفته، حرکت با کلیدهای جهت‌دار و رویدادهای شخصی (تمام‌روز یا ساعت‌دار، با تکرار سالانه اختیاری) در پنجره اصلی
+- همگام‌سازی دو‌طرفه رویدادهای شخصی با Google Calendar (با OAuth client خودتان؛ راهنما در پایین)
 - اجرا با ویندوز (اختیاری)
+
+### FOR DEV: اتصال به تقویم گوگل
+۱. در [Google Cloud Console](https://console.cloud.google.com/) یک پروژه بسازید و **Google Calendar API** را فعال کنید.
+۲. در «OAuth consent screen» برنامه را (External / Testing) تعریف کنید و حساب گوگل خودتان را در «Test users» اضافه کنید.
+۳. در «Credentials» یک **OAuth client ID** از نوع **Desktop app** بسازید.
+۴. در روزنما: تنظیمات ← تقویم گوگل، Client ID و secret را وارد و «اتصال به گوگل» را بزنید؛ مرورگر باز می‌شود و پس از تأیید دسترسی، همگام‌سازی شروع می‌شود.
+
+رویدادها با تقویم اصلی گوگل (از یک سال قبل تا دو سال بعد) دو‌طرفه همگام می‌شوند. توکن دسترسی رمزنگاری‌شده برای کاربر جاری ویندوز نگه‌داری می‌شود. تا وقتی پروژه در حالت Testing است، توکن‌ها پس از ۷ روز منقضی می‌شوند و دوباره باید متصل شد. اگر نسخه‌ای را برای همه منتشر می‌کنید، می‌توانید فایل `google-client.json` (`{ "clientId": "...", "clientSecret": "..." }`) را کنار exe بگذارید.
 
 ### دانلود
 از بخش [Releases](https://github.com/Abulhallaj/rooznama/releases) یکی از چهار فایل را بگیرید (همه بدون نیاز به نصب .NET یا چیز دیگری کار می‌کنند):
@@ -94,7 +105,16 @@ Rooznama shows the Shamsi (Jalali) day number on a system-tray icon. Hover for t
 - Official holidays and observances for 1383–1405, offline (data based on the [FarsiUI calendar](https://farsiui.ir/calendar)); fixed occasions per calendar (Shamsi, Hijri, Gregorian) fill in for later years
 - Hijri dates (Arabic digits) from the official Tehran University calendars or Umm al-Qura, selectable in Settings
 - Week numbers, arrow-key navigation, and personal events (all-day or timed, optional yearly repeat) in the main window
+- Two-way sync of the personal events with Google Calendar (sign in with your own Google Cloud OAuth client, see below)
 - Optional start with Windows
+
+### FOR DEV: Google Calendar
+1. In the [Google Cloud Console](https://console.cloud.google.com/) create a project and enable the **Google Calendar API**.
+2. Set up the OAuth consent screen (External / Testing) and add your Google account under *Test users*.
+3. Under *Credentials* create an **OAuth client ID** of type **Desktop app**.
+4. In Rooznama: Settings > Google Calendar, enter the Client ID and secret and press *Connect to Google*. The browser opens; after you allow access the sync starts.
+
+Personal events sync both ways with your primary Google calendar (one year back to two years ahead). The refresh token is stored encrypted for the current Windows user. While the project is in *Testing* mode Google expires refresh tokens after 7 days, so you will have to connect again. If you distribute a build to others, put a `google-client.json` (`{ "clientId": "...", "clientSecret": "..." }`) next to the exe; publishing for everyone needs Google's verification of the `calendar.events` scope.
 
 ### Download
 Get one of the four files from [Releases](https://github.com/Abulhallaj/rooznama/releases). All of them are self-contained: no .NET or other prerequisites to install.
@@ -153,10 +173,7 @@ Assets/                  icons, fonts
 ```
 
 ### Roadmap
-Google Calendar integration (the personal event model is ready for it), an active-calendar switch (Gregorian / Hijri), online updates of the occasions data.
+more calendars than the primary Google one, an active-calendar switch (Gregorian / Hijri), online updates of the occasions data.
 
-Android and iOS Application
-
-WearOS Application
 ### License
 [MIT](LICENSE). Third-party components: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
