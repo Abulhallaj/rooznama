@@ -110,6 +110,26 @@ public static class Loc
         ["cal.jalali"] = ("شمسی", "Shamsi"),
         ["cal.hijri"] = ("قمری", "Hijri"),
         ["cal.gregorian"] = ("میلادی", "Gregorian"),
+        ["event.untitled"] = ("(بدون عنوان)", "(no title)"),
+
+        ["set.google"] = ("تقویم گوگل", "Google Calendar"),
+        ["google.connect"] = ("اتصال به گوگل", "Connect to Google"),
+        ["google.disconnect"] = ("قطع اتصال", "Disconnect"),
+        ["google.syncnow"] = ("همگام‌سازی اکنون", "Sync now"),
+        ["google.auto"] = ("همگام‌سازی خودکار (هر ۱۵ دقیقه و پس از هر ویرایش)", "Sync automatically (every 15 minutes and after an edit)"),
+        ["google.clientid"] = ("Client ID گوگل", "Google Client ID"),
+        ["google.clientsecret"] = ("Client secret گوگل", "Google Client secret"),
+        ["google.hint"] = ("برای اتصال یک OAuth client از نوع «Desktop app» در Google Cloud Console بسازید، Google Calendar API را فعال کنید و Client ID و secret را اینجا بگذارید. رویدادهای شخصی با تقویم اصلی گوگل همگام می‌شوند (دو‌طرفه، از یک سال قبل تا دو سال بعد). قطع اتصال، رویدادهای موجود را پاک نمی‌کند.",
+                           "To connect, create an OAuth client of type \"Desktop app\" in the Google Cloud Console, enable the Google Calendar API and enter its Client ID and secret here. Personal events sync both ways with your primary Google calendar (from one year back to two years ahead). Disconnecting does not delete the events."),
+        ["google.waiting"] = ("در انتظار تأیید در مرورگر…", "Waiting for you to allow access in the browser…"),
+        ["google.status.noclient"] = ("متصل نیست. ابتدا Client ID را وارد کنید.", "Not connected. Enter a Client ID first."),
+        ["google.status.off"] = ("متصل نیست.", "Not connected."),
+        ["google.status.failed"] = ("اتصال انجام نشد: {0}", "The connection failed: {0}"),
+        ["google.status.connected"] = ("متصل به {0}", "Connected to {0}"),
+        ["google.status.syncing"] = ("متصل به {0} — در حال همگام‌سازی…", "Connected to {0} - syncing…"),
+        ["google.status.last"] = ("متصل به {0} — آخرین همگام‌سازی: {1}", "Connected to {0} - last sync: {1}"),
+        ["google.status.error"] = ("متصل به {0} — خطا در همگام‌سازی: {1}", "Connected to {0} - sync error: {1}"),
+        ["google.status.reconnect"] = ("دسترسی لغو شده است؛ دوباره متصل شوید.", "Access was withdrawn; connect again."),
     };
 
     public static string T(string key) => S.TryGetValue(key, out var v) ? (IsFa ? v.Fa : v.En) : key;
