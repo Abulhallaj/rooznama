@@ -5,6 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## Unreleased
 
+## [1.0.0-beta.2] - 2026-11-08
 ### Added
 - **Google Calendar sync** for the personal events (Settings > Google Calendar). Sign-in uses the system browser with a loopback redirect and PKCE; the refresh token is stored encrypted for the current Windows user (DPAPI), never in `settings.json`. Needs an OAuth client of type *Desktop app* from your own Google Cloud project (Client ID and secret are entered in Settings, or shipped as `google-client.json` next to the exe); the requested access is `calendar.events` plus the account's e-mail address for display.
 - **Two-way sync with the primary calendar** over a window of one year back to two years ahead, every 15 minutes, a few seconds after an edit, and on demand ("Sync now"): new and edited events are sent, deletions are sent, events made at Google (and their edits and deletions) come in and are shown as *Google* events, editable here. A Gregorian yearly event is kept at Google as one event with an RRULE; a Shamsi or Hijri yearly event is sent as one event per year in the window (Google cannot repeat by those calendars). A step that fails stays pending and is retried; an event half-sent when the connection dropped is recognised by a private marker instead of being duplicated; if more than half of the synced events suddenly look deleted at Google, nothing is removed here.
