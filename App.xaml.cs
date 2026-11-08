@@ -27,6 +27,18 @@ public partial class App : Application
         CalendarRuleSet.Load(Path.Combine(AppContext.BaseDirectory, "calendar", "rules"), Log.Write);
     public static CalendarOccasionService Occasions { get; } = new(CalendarData, CalendarRules, HijriService.Provider);
 
+    // Google Calendar: sign-in and the two-way sync of the personal events.
+    static readonly HttpClient GoogleHttp = CreateHttp();
+    public static GoogleAuth Google { get; } = new(GoogleHttp, GoogleClientConfig.Get, Path.Combine(AppPaths.DataDir, "google-token.bin"));
+    public static GoogleSyncScheduler GoogleSync { get; } = new(Google, PersonalEvents, GoogleHttp);
+
+    static HttpClient CreateHttp()
+    {
+        var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("Rooznama/" + AppInfo.VersionText);
+        return http;
+    }
+
     public static FlyoutWindow Flyout { get; private set; } = null!;
     public static TrayService Tray { get; private set; } = null!;
 
@@ -51,6 +63,7 @@ public partial class App : Application
 
         if (Settings.StartWithWindows) Settings.ApplyStartup();   // keeps the Run path current if the exe was moved/updated
         UpdateService.Start();
+        GoogleSync.Start();   // does nothing unless Google is connected
     }
 
     /// <summary>The FontFamily string actually applied (shown in About for diagnosis).</summary>
@@ -110,6 +123,7 @@ public partial class App : Application
 
     public static void Quit()
     {
+        GoogleSync.Dispose();
         Tray.Dispose();
         _shell?.Close();
         Flyout.AllowClose = true;

@@ -16,7 +16,8 @@ public record CalendarEvent(string Title, DateTime Start, DateTime End)
         get
         {
             var t = IsAllDay ? Loc.T("event.allday") : PersianDate.Digits($"{Start:HH:mm} – {End:HH:mm}");
-            return Repeats ? $"{t} · {Loc.T("event.yearly")}" : t;
+            if (Repeats) t = $"{t} · {Loc.T("event.yearly")}";
+            return Source == "google" ? $"{t} · Google" : t;
         }
     }
 }

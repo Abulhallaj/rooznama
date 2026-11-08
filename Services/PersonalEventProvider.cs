@@ -13,7 +13,7 @@ public sealed class PersonalEventProvider : ICalendarEventProvider
             .Select(i => new CalendarEvent(i.Source.Title, i.Start, i.End)
             {
                 Id = i.Source.Id,
-                Source = "personal",
+                Source = i.Source.Origin == "google" ? "google" : "personal",
                 IsAllDay = i.Source.IsAllDay,
                 IsReadOnly = false,
                 Repeats = i.Source.Recurrence != EventRecurrence.None,

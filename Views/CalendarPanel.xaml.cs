@@ -44,7 +44,13 @@ public sealed partial class CalendarPanel : UserControl
         FocusVisualPrimaryThickness = new Thickness(0);
         FocusVisualSecondaryThickness = new Thickness(0);
         KeyDown += Panel_KeyDown;
-        Loaded += (_, _) => { if (_large) FocusSelected(false); };
+        Loaded += (_, _) =>
+        {
+            App.PersonalEvents.Changed -= OnPersonalEventsChanged;   // never twice, however often the page is shown
+            App.PersonalEvents.Changed += OnPersonalEventsChanged;
+            if (_large) FocusSelected(false);
+        };
+        Unloaded += (_, _) => App.PersonalEvents.Changed -= OnPersonalEventsChanged;
         ApplyMode();
         ShowToday();
     }
@@ -464,6 +470,9 @@ public sealed partial class CalendarPanel : UserControl
             Focus(FocusState.Programmatic);
         });
     }
+
+    // a Google sync (on a background thread) or an edit changed the events
+    void OnPersonalEventsChanged() => DispatcherQueue.TryEnqueue(() => _ = LoadEventsAsync(_selected.Date));
 
     // ---------- personal events ----------
     async void AddEvent_Click(object sender, RoutedEventArgs e) => await EditEventAsync(null);
