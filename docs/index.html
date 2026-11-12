@@ -1,247 +1,205 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- ==================== SEO Meta Tags ==================== -->
-    <title>روزنما | تقویم شمسی سبک برای System Tray ویندوز</title>
-    <meta name="description" content="روزنما یک تقویم شمسی (جلالی) متن‌باز و سبک برای System Tray ویندوز است. روز شمسی را روی آیکون نمایش می‌دهد، تقویم بازشونده کنار تسک‌بار، مبدل تاریخ شمسی/میلادی، رابط فارسی و انگلیسی و تم خودکار دارد.">
-    <meta name="keywords" content="روزنما, تقویم شمسی, تقویم جلالی, System Tray, ویندوز, تقویم ویندوز, Rooznama, Shamsi calendar, Jalali calendar, Windows tray calendar">
-    <meta name="author" content="Abulhallaj">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://abulhallaj.github.io/rooznama/">
-
-    <!-- ==================== Open Graph / Social ==================== -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://abulhallaj.github.io/rooznama/">
-    <meta property="og:title" content="روزنما | تقویم شمسی سبک برای System Tray ویندوز">
-    <meta property="og:description" content="تقویم شمسی متن‌باز و سبک برای ویندوز. آیکون Tray با روز شمسی، تقویم بازشونده کنار تسک‌بار، مبدل تاریخ و رابط دو زبانه.">
-    <meta property="og:image" content="https://abulhallaj.github.io/rooznama/social-preview.png">
-    <meta property="og:locale" content="fa_IR">
-    <meta property="og:site_name" content="روزنما">
-
-    <!-- ==================== Twitter Card ==================== -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="روزنما | تقویم شمسی سبک برای System Tray ویندوز">
-    <meta name="twitter:description" content="تقویم شمسی متن‌باز و سبک برای ویندوز. آیکون Tray، تقویم بازشونده، مبدل تاریخ و رابط دو زبانه.">
-    <meta name="twitter:image" content="https://abulhallaj.github.io/rooznama/social-preview.png">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- ==================== Structured Data (JSON-LD) ==================== -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "روزنما (Rooznama)",
-      "alternateName": "Rooznama",
-      "description": "تقویم شمسی سبک برای System Tray ویندوز. نمایش روز شمسی روی آیکون، تقویم بازشونده کنار تسک‌بار، مبدل تاریخ شمسی/میلادی، رابط فارسی و انگلیسی، تم خودکار/روشن/تیره.",
-      "url": "https://abulhallaj.github.io/rooznama/",
-      "author": {
-        "@type": "Person",
-        "name": "Abulhallaj",
-        "url": "https://github.com/Abulhallaj"
-      },
-      "operatingSystem": "Windows 10, Windows 11",
-      "applicationCategory": "UtilitiesApplication",
-      "programmingLanguage": "C#",
-      "codeRepository": "https://github.com/Abulhallaj/rooznama",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": [
-        "آیکون Tray با نمایش روز شمسی",
-        "تقویم بازشونده کنار تسک‌بار",
-        "مبدل تاریخ شمسی ↔ میلادی",
-        "رابط فارسی و انگلیسی",
-        "تم خودکار / روشن / تیره",
-        "اجرا با ویندوز (اختیاری)"
-      ]
-    }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071b1d">
+  <title>روزنما | تقویم شمسی، همیشه در دسترس</title>
+  <meta name="description" content="روزنما، تقویم شمسی سبک و متن‌باز ویندوز؛ نمایش روز شمسی در System Tray، تقویم بازشونده، تبدیل تاریخ و مناسبت‌ها.">
+  <meta name="keywords" content="روزنما, تقویم شمسی, تقویم جلالی, ویندوز, System Tray, Rooznama">
+  <meta name="author" content="Abulhallaj">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://abulhallaj.github.io/rooznama/">
+  <link rel="icon" href="favico.ico" sizes="any">
+  <link rel="apple-touch-icon" href="rooznama_mainwindow.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://abulhallaj.github.io/rooznama/">
+  <meta property="og:title" content="روزنما | تقویم شمسی، همیشه در دسترس">
+  <meta property="og:description" content="تقویم شمسی سبک و متن‌باز برای ویندوز؛ همیشه کنار ساعت ویندوز.">
+  <meta property="og:image" content="https://abulhallaj.github.io/rooznama/rooznama_mainwindow.png">
+  <meta property="og:locale" content="fa_IR">
+  <meta property="og:site_name" content="روزنما">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="روزنما | تقویم شمسی، همیشه در دسترس">
+  <meta name="twitter:description" content="تقویم شمسی سبک و متن‌باز برای ویندوز.">
+  <meta name="twitter:image" content="https://abulhallaj.github.io/rooznama/rooznama_mainwindow.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "روزنما",
+    "alternateName": "Rooznama",
+    "description": "تقویم شمسی سبک و متن‌باز برای ویندوز با نمایش تاریخ در System Tray و تقویم بازشونده.",
+    "url": "https://abulhallaj.github.io/rooznama/",
+    "operatingSystem": "Windows",
+    "applicationCategory": "UtilitiesApplication",
+    "programmingLanguage": "C#",
+    "codeRepository": "https://github.com/Abulhallaj/rooznama",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
 </head>
 <body>
+  <a class="skip-link" href="#main">رفتن به محتوای اصلی</a>
 
-    <a href="#main" class="skip-link">پرش به محتوای اصلی</a>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#top" aria-label="روزنما، صفحه اصلی">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <span>روزنما</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="باز کردن منو">
+        <span></span><span></span>
+      </button>
+      <nav class="nav" id="primary-nav" aria-label="ناوبری اصلی">
+        <a href="#experience">تجربه روزنما</a>
+        <a href="#features">امکانات</a>
+        <a href="#download">دریافت</a>
+        <a class="nav-github" href="https://github.com/Abulhallaj/rooznama" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
 
-    <header class="header">
-        <div class="container header-content">
-            <a href="/rooznama/" class="logo" aria-label="صفحه اصلی روزنما">
-                <span class="logo-icon">📅</span>
-                <span class="logo-text">روزنما</span>
-            </a>
-            <nav class="nav" aria-label="ناوبری اصلی">
-                <ul class="nav-list">
-                    <li><a href="#features">امکانات</a></li>
-                    <li><a href="#download">دانلود</a></li>
-                    <li><a href="#screenshots">تصاویر</a></li>
-                    <li><a href="https://github.com/Abulhallaj/rooznama" class="nav-github" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-glow hero-glow-a"></div>
+      <div class="hero-glow hero-glow-b"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> تقویم شمسی برای ویندوز</div>
+          <h1>تاریخ امروزت،<br><span>همیشه دمِ دست.</span></h1>
+          <p class="hero-lead">روزنما تقویم شمسی را به گوشه‌ای از ویندوز می‌آورد که همیشه به آن سر می‌زنی؛ کنار ساعت، در System Tray.</p>
+          <p class="hero-detail">روز شمسی را روی آیکون ببین، با یک کلیک تقویم را باز کن و تاریخ شمسی و میلادی را بدون جست‌وجو در دسترس داشته باش.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#download"><span>دریافت روزنما</span><span class="button-arrow" aria-hidden="true">←</span></a>
+            <a class="button button-quiet" href="#experience">آشنایی با امکانات <span aria-hidden="true">⌄</span></a>
+          </div>
+          <div class="hero-meta">
+            <span><i class="meta-check">✓</i> رایگان و متن‌باز</span>
+            <span><i class="meta-check">✓</i> مناسب ویندوز</span>
+            <span><i class="meta-check">✓</i> رابط فارسی</span>
+          </div>
         </div>
-    </header>
 
-    <main id="main">
-
-        <!-- ==================== HERO ==================== -->
-        <section class="hero">
-            <div class="container">
-                <h1 class="hero-title">
-                    تقویم شمسی، <span class="highlight">همیشه در دسترس</span> روی System Tray ویندوز
-                </h1>
-                <p class="hero-subtitle">
-                    <strong>روزنما</strong> یک تقویم شمسی (جلالی) متن‌باز و فوق‌سبک است که روز شمسی را 
-                    مستقیماً روی آیکون <strong>System Tray</strong> نمایش می‌دهد. با یک کلیک، 
-                    تقویم بازشونده کنار تسک‌بار باز می‌شود؛ با نگه‌داشتن ماوس، تاریخ دقیق شمسی و میلادی را می‌بینید. 
-                    رابط دو زبانه، فونت وزیرمتن و تم خودکار، آن را به یک همراه روزانه تبدیل کرده است.
-                </p>
-                <div class="hero-actions">
-                    <a href="#download" class="btn btn-primary">دانلود روزنما</a>
-                    <a href="https://github.com/Abulhallaj/rooznama" class="btn btn-secondary" target="_blank" rel="noopener">
-                        مشاهده در GitHub
-                    </a>
-                </div>
-
-                <!-- ترمینال/پیش‌نمایش ساده از خروجی -->
-                <div class="hero-visual">
-                    <div class="terminal-mockup">
-                        <div class="terminal-header">
-                            <span class="dot red"></span>
-                            <span class="dot yellow"></span>
-                            <span class="dot green"></span>
-                            <span class="terminal-title">Rooznama.exe — System Tray</span>
-                        </div>
-                        <pre class="terminal-body"><code><span class="terminal-success">✅ روزنما در حال اجراست.</span>
-<span class="terminal-info">📅 امروز: ۱۲ آبان ۱۴۰۵</span>
-<span class="terminal-info">📅 میلادی: ۲ نوامبر ۲۰۲۶</span>
-<span class="terminal-success">🖱️ برای مشاهده تقویم روی آیکون کلیک کنید.</span></code></pre>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== FEATURES ==================== -->
-        <section id="features" class="features">
-            <div class="container">
-                <h2 class="section-title">چرا روزنما؟</h2>
-                <p class="section-subtitle">تمام چیزی که از یک تقویم شمسی سبک انتظار دارید، بدون شلوغی.</p>
-
-                <div class="features-grid">
-                    <article class="feature-card">
-                        <div class="feature-icon">🔢</div>
-                        <h3>روز شمسی روی Tray</h3>
-                        <p>عدد روز شمسی مستقیماً روی آیکون System Tray نمایش داده می‌شود. رنگ آیکون قابل تنظیم است و tooltip آن تاریخ شمسی و میلادی را نشان می‌دهد.</p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon">📂</div>
-                        <h3>تقویم بازشونده کنار تسک‌بار</h3>
-                        <p>با کلیک روی آیکون، یک تقویم شبیه ویندوز ۱۱ با پس‌زمینه acrylic و انیمیشن باز می‌شود. نمای روز، ماه و سال، و روزهای ماه قبل/بعد به‌صورت کم‌رنگ.</p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon">🔄</div>
-                        <h3>مبدل تاریخ شمسی ↔ میلادی</h3>
-                        <p>در پنجره اصلی، تقویم بزرگ با روز میلادی کنار هر روز و یک مبدل تاریخ برای تبدیل سریع بین شمسی و میلادی در دسترس است.</p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon">🌐</div>
-                        <h3>رابط فارسی و انگلیسی</h3>
-                        <p>رابط کاربری به‌طور کامل دو زبانه است. فارسی زبان پیش‌فرض است و فونت وزیرمتن به‌صورت داخلی همراه برنامه ارائه می‌شود.</p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon">🎨</div>
-                        <h3>تم خودکار / روشن / تیره</h3>
-                        <p>تم برنامه می‌تواند خودکار با تنظیمات ویندوز هماهنگ شود، یا به‌صورت دستی روی حالت روشن یا تیره قرار گیرد.</p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon">⚙️</div>
-                        <h3>سبک و خودکفا</h3>
-                        <p>نسخه‌های پرتابل و نصبی هر دو خودکفا هستند و نیازی به نصب .NET یا پیش‌نیاز دیگری ندارند. اجرای خودکار با ویندوز نیز اختیاری است.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== DOWNLOAD ==================== -->
-        <section id="download" class="install">
-            <div class="container">
-                <h2 class="section-title">دانلود و نصب</h2>
-                <p class="section-subtitle">از بخش Releases در GitHub، یکی از چهار فایل را دریافت کنید. همه خودکفا هستند.</p>
-
-                <div class="install-steps">
-                    <div class="step">
-                        <div class="step-number">۱</div>
-                        <div class="step-content">
-                            <h3>نسخه پرتابل (ZIP)</h3>
-                            <p>فایل ZIP را در هر پوشه‌ای باز کنید و <code>Rooznama.exe</code> را اجرا کنید. تنظیمات و لاگ در پوشه <code>data</code> کنار برنامه ذخیره می‌شوند.</p>
-                            <a href="https://github.com/Abulhallaj/rooznama/releases" class="btn btn-secondary" target="_blank" rel="noopener">دریافت نسخه پرتابل</a>
-                        </div>
-                    </div>
-
-                    <div class="step">
-                        <div class="step-number">۲</div>
-                        <div class="step-content">
-                            <h3>نسخه نصبی (Setup)</h3>
-                            <p>بدون نیاز به دسترسی ادمین برای کاربر جاری نصب می‌شود. میانبر Start menu ایجاد کرده و حذف تمیزی دارد.</p>
-                            <a href="https://github.com/Abulhallaj/rooznama/releases" class="btn btn-secondary" target="_blank" rel="noopener">دریافت نسخه نصبی</a>
-                        </div>
-                    </div>
-
-                    <div class="step">
-                        <div class="step-number">۳</div>
-                        <div class="step-content">
-                            <h3>پس از نصب</h3>
-                            <p>آیکون در System Tray ظاهر می‌شود (در ویندوز ۱۱ ممکن است داخل overflow باشد؛ آن را به نوار بکشید). برای مشاهده تقویم روی آیکون کلیک کنید.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== SCREENSHOTS ==================== -->
-        <section id="screenshots" class="features" style="padding-top: 0;">
-            <div class="container">
-                <h2 class="section-title">تصاویر برنامه</h2>
-                <p class="section-subtitle">نگاهی به صفحه اصلی تقویم و تقویم بازشونده کنار تسک‌بار.</p>
-
-                <div class="screenshots-grid">
-                    <!-- این تصاویر را از پوشه docs/screenshots در مخزن خود کپی کنید -->
-                    <figure class="screenshot-item">
-                        <img src="rooznama_mainwindow.png" alt="صفحه اصلی تقویم روزنما با تقویم بزرگ و مبدل تاریخ" loading="lazy" width="600" height="400">
-                        <figcaption>صفحه اصلی تقویم</figcaption>
-                    </figure>
-                    <figure class="screenshot-item">
-                        <img src="rooznama_flyoutwindow.png" alt="تقویم بازشونده روزنما کنار System Tray ویندوز" loading="lazy" width="400" height="500">
-                        <figcaption>تقویم بازشونده کنار تسک‌بار</figcaption>
-                    </figure>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <footer class="footer">
-        <div class="container footer-content">
-            <p>&copy; ۲۰۲۶ روزنما. متن‌باز و رایگان.</p>
-            <div class="footer-links">
-                <a href="https://github.com/Abulhallaj/rooznama" target="_blank" rel="noopener">GitHub</a>
-                <a href="https://github.com/Abulhallaj/rooznama/releases" target="_blank" rel="noopener">Releases</a>
-            </div>
+        <div class="hero-product reveal" aria-label="پیش‌نمایش محیط روزنما">
+          <div class="product-orbit orbit-one"></div>
+          <div class="product-orbit orbit-two"></div>
+          <div class="product-window main-window">
+            <div class="window-top"><span class="window-title"><span class="mini-mark"></span> روزنما</span><span class="window-controls">—　□　×</span></div>
+            <img src="rooznama_mainwindow.png" alt="نمای پنجره اصلی تقویم روزنما" fetchpriority="high">
+          </div>
+          <div class="product-window flyout-window">
+            <div class="flyout-label"><span class="live-dot"></span> همیشه در دسترس</div>
+            <img src="rooznama_flyoutwindow.png" alt="نمای تقویم بازشونده روزنما کنار تسک‌بار">
+          </div>
+          <div class="floating-note"><span class="note-icon">۲۲</span><span><strong>تاریخ شمسی</strong><small>در کنار ساعت ویندوز</small></span></div>
         </div>
-    </footer>
+      </div>
+      <div class="hero-bottom container">
+        <span>یک ابزار کوچک، برای هر روز</span>
+        <span class="scroll-line"></span>
+        <a href="#experience">بیشتر ببین <span aria-hidden="true">↓</span></a>
+      </div>
+    </section>
 
+    <section class="intro-section section-pad" id="experience">
+      <div class="container intro-grid">
+        <div class="section-kicker reveal"><span>01</span> / تجربه روزمره</div>
+        <div class="intro-content reveal">
+          <h2>تقویم باید<br><em>نزدیک باشد، نه مزاحم.</em></h2>
+          <p>برای دیدن تاریخ لازم نیست پنجره‌ای را باز کنی یا از کاری که انجام می‌دهی بیرون بیایی. روزنما در System Tray می‌ماند؛ درست همان‌جا که انتظارش را داری.</p>
+          <div class="intro-points">
+            <div><b>۰۱</b><span>روز شمسی، روی آیکون</span></div>
+            <div><b>۰۲</b><span>تقویم، با یک کلیک</span></div>
+            <div><b>۰۳</b><span>تاریخ دقیق، در یک نگاه</span></div>
+          </div>
+        </div>
+        <figure class="experience-shot reveal">
+          <div class="shot-caption"><span>ROOZNAMA / FLYOUT</span><span>02 — 01</span></div>
+          <img src="rooznama_flyoutwindow.png" alt="تقویم بازشونده روزنما با تاریخ شمسی و میلادی" loading="lazy">
+          <figcaption>تقویم بازشونده؛ ساده، خوانا و نزدیک به تسک‌بار</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="features-section section-pad" id="features">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div><div class="section-kicker"><span>02</span> / امکانات</div><h2>همه‌چیز سر جای خودش.</h2></div>
+          <p>امکانات ضروری یک تقویم شمسی، بدون شلوغی و پیچیدگی اضافه.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card feature-card-large reveal">
+            <div class="feature-symbol symbol-calendar" aria-hidden="true"><span>۲۲</span></div>
+            <div><span class="feature-index">01 / TRAY</span><h3>تاریخ، کنار ساعت</h3><p>عدد روز شمسی روی آیکون System Tray نمایش داده می‌شود و تاریخ کامل از طریق توضیح آیکون در دسترس است.</p></div>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-symbol" aria-hidden="true">▦</div><span class="feature-index">02 / CALENDAR</span><h3>تقویم بازشونده</h3><p>با کلیک روی آیکون، نمای تقویم را در پنجره‌ای جمع‌وجور کنار تسک‌بار ببین.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-symbol" aria-hidden="true">⇄</div><span class="feature-index">03 / CONVERTER</span><h3>تبدیل تاریخ</h3><p>تبدیل تاریخ شمسی و میلادی در محیط اصلی برنامه.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-symbol" aria-hidden="true">◐</div><span class="feature-index">04 / THEMES</span><h3>روشن، تاریک یا خودکار</h3><p>ظاهر برنامه را با سلیقه‌ات هماهنگ کن یا انتخاب تم را به ویندوز بسپار.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-symbol" aria-hidden="true">文</div><span class="feature-index">05 / LANGUAGE</span><h3>فارسی و انگلیسی</h3><p>رابط کاربری دو زبانه با پشتیبانی از نمایش فارسی و فونت وزیرمتن.</p>
+          </article>
+          <article class="feature-card feature-card-wide reveal">
+            <div class="feature-symbol" aria-hidden="true">⌁</div><div><span class="feature-index">06 / LIGHTWEIGHT</span><h3>همراه سبک و بی‌دردسر</h3><p>برای دسترسی روزانه طراحی شده؛ با امکان اجرای خودکار هنگام ورود به ویندوز.</p></div>
+            <span class="wide-decoration" aria-hidden="true">R.</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="showcase-section section-pad">
+      <div class="container showcase-grid">
+        <div class="showcase-copy reveal">
+          <div class="section-kicker"><span>03</span> / جزئیات</div>
+          <h2>یک نگاه کافی‌ست.</h2>
+          <p>در پنجره اصلی، نمای بزرگ‌تری از ماه در اختیار داری؛ روزها را مرور کن، تاریخ معادل میلادی را ببین و از مبدل تاریخ استفاده کن.</p>
+          <a class="text-link" href="https://github.com/Abulhallaj/rooznama" target="_blank" rel="noopener noreferrer">مشاهده سورس پروژه <span aria-hidden="true">↗</span></a>
+        </div>
+        <figure class="main-shot reveal">
+          <div class="shot-topline"><span>ROOZNAMA / CALENDAR</span><span>01 — 02</span></div>
+          <img src="rooznama_mainwindow.png" alt="نمای پنجره اصلی روزنما، تقویم ماهانه و تاریخ‌های میلادی" loading="lazy">
+        </figure>
+      </div>
+    </section>
+
+    <section class="download-section section-pad" id="download">
+      <div class="container">
+        <div class="download-panel reveal">
+          <div class="download-orb"></div>
+          <div class="download-copy">
+            <div class="section-kicker"><span>04</span> / دریافت</div>
+            <h2>روزهای بعدی،<br><em>با روزنما.</em></h2>
+            <p>روزنما رایگان و متن‌باز است. نسخه‌های منتشرشده و فایل‌های نصب را از صفحه رسمی انتشار در GitHub دریافت کن.</p>
+            <a class="button button-primary" href="https://github.com/Abulhallaj/rooznama/releases" target="_blank" rel="noopener noreferrer">رفتن به صفحه دانلود <span class="button-arrow" aria-hidden="true">←</span></a>
+            <small class="download-note">برای اطلاع از آخرین نسخه، توضیحات و فایل‌های همان انتشار را بررسی کن.</small>
+          </div>
+          <div class="download-visual" aria-hidden="true">
+            <div class="download-card"><span class="download-logo">ر</span><strong>روزنما</strong><small>تقویم شمسی ویندوز</small><div class="download-card-line"></div><span class="download-card-type">WINDOWS APP</span></div>
+            <div class="download-ring"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <a class="brand" href="#top"><span class="brand-mark"><span></span><span></span><span></span><span></span></span><span>روزنما</span></a>
+      <p>تقویم شمسی، همیشه در دسترس.</p>
+      <div class="footer-links">
+        <a href="https://github.com/Abulhallaj/rooznama" target="_blank" rel="noopener noreferrer">مخزن GitHub</a>
+        <a href="https://github.com/Abulhallaj/rooznama/releases" target="_blank" rel="noopener noreferrer">انتشارها</a>
+      </div>
+    </div>
+    <div class="container footer-bottom"><span>© ۲۰۲۶ روزنما</span><span>ساخته‌شده برای روزهای شما <i>✳</i></span></div>
+  </footer>
+  <script src="script.js" defer></script>
 </body>
 </html>
