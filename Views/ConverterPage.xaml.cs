@@ -20,6 +20,7 @@ public sealed partial class ConverterPage : Page
 
         var min = new DateTimeOffset(new DateTime(1900, 1, 1));
         var max = new DateTimeOffset(new DateTime(2200, 12, 31));
+        for (int m = 1; m <= 12; m++) HMonth.Items.Add(HijriService.MonthName(m));
         FaPicker.MinDate = GPicker.MinDate = min;
         FaPicker.MaxDate = GPicker.MaxDate = max;
 
@@ -41,17 +42,55 @@ public sealed partial class ConverterPage : Page
         UpdateTexts();
     }
 
-    void UpdateTexts()
+    // the Hijri boxes follow the Gregorian date, and drive it when the person types a Hijri date
+    void Hijri_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e) => FromHijri();
+    void Hijri_SelectionChanged(object sender, SelectionChangedEventArgs e) => FromHijri();
+
+    void FromHijri()
+    {
+        if (_sync || double.IsNaN(HYear.Value) || double.IsNaN(HDay.Value) || HMonth.SelectedIndex < 0) return;
+
+        var h = new HijriDate((int)HYear.Value, HMonth.SelectedIndex + 1, (int)HDay.Value);
+        if (HijriLookup.FindGregorian(h, HijriService.Provider) is not { } day
+            || day < GPicker.MinDate.Date || day > GPicker.MaxDate.Date)
+        {
+            HNum.Text = Loc.T("conv.hijri.invalid");
+            return;
+        }
+
+        _sync = true;
+        try
+        {
+            var date = new DateTimeOffset(day);
+            GPicker.Date = date;
+            FaPicker.Date = date;
+        }
+        finally { _sync = false; }
+        UpdateTexts(updateHijriBoxes: false);
+    }
+
+    void UpdateTexts(bool updateHijriBoxes = true)
     {
         if (GPicker.Date is { } d)
         {
             var day = d.Date;
             FaNum.Text = PersianDate.Numeric(day);
             GNum.Text = day.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture);
+            if (HijriService.Get(day) is { } h)
+            {
+                HNum.Text = HijriService.Digits($"{h.Year:0000}/{h.Month:00}/{h.Day:00}");   // Arabic digits
+                if (updateHijriBoxes)
+                {
+                    _sync = true;
+                    try { HYear.Value = h.Year; HMonth.SelectedIndex = h.Month - 1; HDay.Value = h.Day; }
+                    finally { _sync = false; }
+                }
+            }
+            else HNum.Text = Loc.T("conv.hijri.none");
         }
         else
         {
-            FaNum.Text = GNum.Text = "";
+            FaNum.Text = GNum.Text = HNum.Text = "";
         }
     }
 
@@ -64,4 +103,5 @@ public sealed partial class ConverterPage : Page
 
     void CopyFa_Click(object sender, RoutedEventArgs e) => Copy(FaNum.Text);
     void CopyG_Click(object sender, RoutedEventArgs e) => Copy(GNum.Text);
+    void CopyH_Click(object sender, RoutedEventArgs e) => Copy(HNum.Text);
 }

@@ -26,7 +26,7 @@ public sealed partial class CalendarPanel : UserControl
     bool _large;
     int _renderVer;   // lets a slow holiday lookup notice that the view has moved on
 
-    int CellH => _large ? 64 : 40;
+    int CellH => _large ? CellMetrics.CellHeight : 40;
     int HeadH => _large ? 32 : 28;
 
     /// <summary>Large cells with the Gregorian day beside each Shamsi day, plus a Today button (shell calendar page).</summary>
@@ -48,9 +48,16 @@ public sealed partial class CalendarPanel : UserControl
         {
             App.PersonalEvents.Changed -= OnPersonalEventsChanged;   // never twice, however often the page is shown
             App.PersonalEvents.Changed += OnPersonalEventsChanged;
+            CellMetrics.Changed -= OnCellMetricsChanged;
+            CellMetrics.Changed += OnCellMetricsChanged;
+            CellMetrics.StartLive();   // Debug builds: cell-metrics.json is watched, see CellMetrics
             if (_large) FocusSelected(false);
         };
-        Unloaded += (_, _) => App.PersonalEvents.Changed -= OnPersonalEventsChanged;
+        Unloaded += (_, _) =>
+        {
+            App.PersonalEvents.Changed -= OnPersonalEventsChanged;
+            CellMetrics.Changed -= OnCellMetricsChanged;
+        };
         ApplyMode();
         ShowToday();
     }
@@ -173,6 +180,7 @@ public sealed partial class CalendarPanel : UserControl
             b.Tag = date;
             ToolTipService.SetToolTip(b, new ToolTip { Content = DayInfo.Text(date), FlowDirection = Loc.Flow });
             Mark(b, accent: date == today, selected: date == _selected.Date, red: i % 7 == 6, dim: !inMonth);
+            if (CellMetrics.FridayBackground && i % 7 == 6 && date != today) b.Background = new SolidColorBrush(CellMetrics.HolidayBackground);
             Grid.SetRow(b, 1 + i / 7);
             Grid.SetColumn(b, i % 7 + c0);
             ViewGrid.Children.Add(b);
@@ -213,7 +221,11 @@ public sealed partial class CalendarPanel : UserControl
             var occ = await App.Occasions.GetForDateAsync(date);
             if (ver != _renderVer) return;
             if (occ.Count == 0) continue;
-            if (date != today && occ.Any(o => o.IsHoliday)) cell.Foreground = new SolidColorBrush(Colors.IndianRed);
+            if (date != today && occ.Any(o => o.IsHoliday))
+            {
+                cell.Foreground = new SolidColorBrush(Colors.IndianRed);
+                cell.Background = new SolidColorBrush(CellMetrics.HolidayBackground);   // a light red tile, readable on both themes
+            }
             ToolTipService.SetToolTip(cell, new ToolTip { Content = DayInfo.Text(date, occ), FlowDirection = Loc.Flow });
         }
     }
@@ -271,33 +283,26 @@ public sealed partial class CalendarPanel : UserControl
             Padding = new Thickness(0),
             CornerRadius = new CornerRadius(8)
         };
-        var sp = new StackPanel { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-        sp.Children.Add(new TextBlock
-        {
-            Text = PersianDate.Num(day),
-            FontSize = 18,
-            FontWeight = FontWeights.SemiBold,
-            HorizontalAlignment = HorizontalAlignment.Center
-        });
-        var sub = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, HorizontalAlignment = HorizontalAlignment.Center };
-        sub.Children.Add(new TextBlock
-        {
-            Text = date.Day == 1 ? date.ToString("d MMM", CultureInfo.InvariantCulture)
-                                 : date.Day.ToString(CultureInfo.InvariantCulture),
-            FontSize = 11,
-            Opacity = 0.65
-        });
+        // Shamsi, Gregorian and Hijri day: size, weight, opacity and position of each come from CellMetrics
+        b.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+        b.VerticalContentAlignment = VerticalAlignment.Stretch;
+        var cell = new Grid();
+        cell.Children.Add(Number(PersianDate.Num(day), CellMetrics.ShamsiSize, CellMetrics.ShamsiWeight, 1, CellMetrics.ShamsiSlot, CellMetrics.ShamsiLift));
+        cell.Children.Add(Number(date.Day == 1 ? date.ToString("d MMM", CultureInfo.InvariantCulture) : date.Day.ToString(CultureInfo.InvariantCulture),
+                                 CellMetrics.GregorianSize, FontWeights.Normal, CellMetrics.GregorianOpacity, CellMetrics.GregorianSlot));
         if (App.Settings.ShowHijriInCells && HijriService.Get(date) is { } h)
-            sub.Children.Add(new TextBlock
-            {
-                Text = h.Day == 1 ? HijriService.MonthName(h.Month) : HijriService.Num(h.Day),   // Arabic digits
-                FontSize = 11,
-                Opacity = 0.65
-            });
-        sp.Children.Add(sub);
-        b.Content = sp;
+            cell.Children.Add(Number(h.Day == 1 ? HijriService.MonthName(h.Month) : HijriService.Num(h.Day),   // Arabic digits
+                                     CellMetrics.HijriSize, FontWeights.Normal, CellMetrics.HijriOpacity, CellMetrics.HijriSlot));
+        b.Content = cell;
         b.Click += Cell_Click;
         return b;
+    }
+
+    static TextBlock Number(string text, double size, Windows.UI.Text.FontWeight weight, double opacity, CellSlot slot, double lift = 0)
+    {
+        var t = new TextBlock { Text = text, FontSize = size, FontWeight = weight, Opacity = opacity };
+        CellMetrics.Place(t, slot, lift);
+        return t;
     }
 
     Button NewCell(string text, bool circle)
@@ -470,6 +475,9 @@ public sealed partial class CalendarPanel : UserControl
             Focus(FocusState.Programmatic);
         });
     }
+
+    // cell-metrics.json was saved (Debug builds): the new sizes and positions apply at once
+    void OnCellMetricsChanged() => DispatcherQueue.TryEnqueue(() => { ApplyMode(); Render(); });
 
     // a Google sync (on a background thread) or an edit changed the events
     void OnPersonalEventsChanged() => DispatcherQueue.TryEnqueue(() => _ = LoadEventsAsync(_selected.Date));

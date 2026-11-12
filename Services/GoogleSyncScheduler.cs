@@ -41,6 +41,7 @@ public sealed class GoogleSyncScheduler : IDisposable
     public void Start()
     {
         Stop();
+        if (!App.Settings.Experimental) return;   // experimental, off: no timers, no requests
         if (!_auth.IsConnected) { Set(GoogleSyncState.NotConnected); return; }
         if (State == GoogleSyncState.NotConnected || State == GoogleSyncState.NeedsReconnect) Set(GoogleSyncState.Idle);
         if (!App.Settings.GoogleAutoSync) return;
@@ -68,6 +69,7 @@ public sealed class GoogleSyncScheduler : IDisposable
     /// <summary>Syncs now. Does nothing when a sync is already running or the account is not connected.</summary>
     public async Task SyncNowAsync()
     {
+        if (!App.Settings.Experimental) return;
         if (!_auth.IsConnected) { Set(GoogleSyncState.NotConnected); return; }
         if (!await _one.WaitAsync(0).ConfigureAwait(false)) return;
         _cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));

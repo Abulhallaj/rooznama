@@ -117,6 +117,33 @@ public sealed class UtHijriSource : IHijriSource
     }
 }
 
+/// <summary>The Gregorian day that has a given Hijri date, as a provider counts it (the reverse of IHijriProvider.Get).</summary>
+public static class HijriLookup
+{
+    /// <summary>Null when no day has that Hijri date: day 30 of a 29-day month, or a year the sources do not know.</summary>
+    public static DateTime? FindGregorian(HijriDate target, IHijriProvider provider)
+    {
+        if (target.Year is < 1 or > 9000 || target.Month is < 1 or > 12 || target.Day is < 1 or > 30) return null;
+
+        // The civil (tabular) calendar is never more than three days away from the observed ones, so look around its answer.
+        var estimate = TabularEstimate(target);
+        for (int delta = 0; delta <= 3; delta++)
+            foreach (var d in delta == 0 ? new[] { 0 } : new[] { -delta, delta })
+            {
+                DateTime candidate;
+                try { candidate = estimate.AddDays(d); } catch (ArgumentOutOfRangeException) { continue; }
+                if (provider.Get(candidate, out _) == target) return candidate;
+            }
+        return null;
+    }
+
+    static DateTime TabularEstimate(HijriDate h)
+    {
+        long jdn = h.Day + (long)Math.Ceiling(29.5 * (h.Month - 1)) + (h.Year - 1L) * 354 + (3 + 11L * h.Year) / 30 + 1948440 - 1;
+        return new DateTime(1, 1, 1).AddDays(jdn - 1721426);
+    }
+}
+
 public interface IHijriProvider
 {
     /// <param name="official">True when the answer came from the Tehran University Calendar Center data.</param>

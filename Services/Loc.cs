@@ -26,6 +26,12 @@ public static class Loc
 
         ["conv.shamsi"] = ("تاریخ شمسی", "Shamsi (Jalali) date"),
         ["conv.gregorian"] = ("تاریخ میلادی", "Gregorian date"),
+        ["conv.hijri"] = ("تاریخ قمری", "Hijri date"),
+        ["conv.hijri.year"] = ("سال", "Year"),
+        ["conv.hijri.month"] = ("ماه", "Month"),
+        ["conv.hijri.day"] = ("روز", "Day"),
+        ["conv.hijri.none"] = ("— (خارج از بازه)", "— (out of range)"),
+        ["conv.hijri.invalid"] = ("تاریخ قمری نامعتبر", "Invalid Hijri date"),
         ["copy"] = ("کپی", "Copy"),
 
         ["set.appearance"] = ("ظاهر", "Appearance"),
@@ -112,6 +118,15 @@ public static class Loc
         ["cal.gregorian"] = ("میلادی", "Gregorian"),
         ["event.untitled"] = ("(بدون عنوان)", "(no title)"),
 
+        ["set.exp"] = ("امکانات آزمایشی", "Experimental features"),
+        ["set.exp.enable"] = ("فعال‌سازی امکانات آزمایشی", "Enable experimental features"),
+        ["set.exp.note"] = ("این امکانات هنوز در انتشار رسمی نیستند و ممکن است ناپایدار باشند، تغییر کنند یا حذف شوند.",
+                            "These features are not part of an official release yet and may be unstable, change or be removed."),
+        ["exp.warn.title"] = ("امکانات آزمایشی", "Experimental features"),
+        ["exp.warn.body"] = ("این قابلیت‌ها هنوز در مرحله انتشار رسمی نیستند. ممکن است درست کار نکنند، در نسخه‌های بعد تغییر کنند یا حذف شوند و ممکن است به حساب‌ها یا سرویس‌های بیرونی شما وصل شوند. فقط اگر می‌دانید چه می‌کنید فعالشان کنید.",
+                             "These features are not part of an official release yet. They may not work correctly, may change or be removed in later versions, and may connect to your accounts or outside services. Enable them only if you know what you are doing."),
+        ["exp.warn.ok"] = ("فعال کن", "Enable"),
+        ["exp.warn.cancel"] = ("انصراف", "Cancel"),
         ["set.google"] = ("تقویم گوگل", "Google Calendar"),
         ["google.connect"] = ("اتصال به گوگل", "Connect to Google"),
         ["google.disconnect"] = ("قطع اتصال", "Disconnect"),

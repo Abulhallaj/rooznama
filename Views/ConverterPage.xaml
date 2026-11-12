@@ -43,5 +43,34 @@
                 </Grid>
             </StackPanel>
         </Border>
+
+        <Border Padding="16" CornerRadius="8"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <StackPanel Spacing="10">
+                <TextBlock Text="{x:Bind svc:Loc.T('conv.hijri')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1.6*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <NumberBox x:Name="HYear" Header="{x:Bind svc:Loc.T('conv.hijri.year')}" Minimum="1318" Maximum="1500"
+                               SpinButtonPlacementMode="Compact" ValueChanged="Hijri_ValueChanged"/>
+                    <ComboBox x:Name="HMonth" Grid.Column="1" Header="{x:Bind svc:Loc.T('conv.hijri.month')}"
+                              HorizontalAlignment="Stretch" SelectionChanged="Hijri_SelectionChanged"/>
+                    <NumberBox x:Name="HDay" Grid.Column="2" Header="{x:Bind svc:Loc.T('conv.hijri.day')}" Minimum="1" Maximum="30"
+                               SpinButtonPlacementMode="Compact" ValueChanged="Hijri_ValueChanged"/>
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="HNum" Opacity="0.8" VerticalAlignment="Center" IsTextSelectionEnabled="True"/>
+                    <Button Grid.Column="1" Content="{x:Bind svc:Loc.T('copy')}" Click="CopyH_Click"/>
+                </Grid>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </Page>

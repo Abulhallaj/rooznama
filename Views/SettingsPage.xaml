@@ -148,27 +148,38 @@
                 </StackPanel>
             </Border>
 
-            <!-- Google Calendar -->
+            <!-- Experimental features: nothing under the switch is shown until it is turned on -->
             <Border Padding="16" CornerRadius="8"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="{x:Bind svc:Loc.T('set.google')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                    <TextBlock x:Name="GoogleStatusText" TextWrapping="Wrap"/>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button x:Name="GoogleConnectBtn" Click="GoogleConnect_Click"/>
-                        <Button x:Name="GoogleSyncBtn" Content="{x:Bind svc:Loc.T('google.syncnow')}" Click="GoogleSync_Click"/>
-                    </StackPanel>
+                    <TextBlock Text="{x:Bind svc:Loc.T('set.exp')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="{x:Bind svc:Loc.T('google.auto')}" TextWrapping="Wrap"/>
-                        <ToggleSwitch x:Name="GoogleAutoSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
-                                      OffContent="{x:Bind svc:Loc.T('off')}" Toggled="GoogleAuto_Toggled"/>
+                        <TextBlock Text="{x:Bind svc:Loc.T('set.exp.enable')}" TextWrapping="Wrap"/>
+                        <ToggleSwitch x:Name="ExperimentalSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
+                                      OffContent="{x:Bind svc:Loc.T('off')}" Toggled="Experimental_Toggled"/>
                     </StackPanel>
-                    <TextBox x:Name="GoogleClientIdBox" FlowDirection="LeftToRight"
-                             Header="{x:Bind svc:Loc.T('google.clientid')}" LostFocus="GoogleClient_LostFocus"/>
-                    <PasswordBox x:Name="GoogleClientSecretBox" FlowDirection="LeftToRight"
-                                 Header="{x:Bind svc:Loc.T('google.clientsecret')}" LostFocus="GoogleClient_LostFocus"/>
-                    <TextBlock Text="{x:Bind svc:Loc.T('google.hint')}" TextWrapping="Wrap" Opacity="0.6" FontSize="12"/>
+                    <TextBlock Text="{x:Bind svc:Loc.T('set.exp.note')}" TextWrapping="Wrap" Opacity="0.6" FontSize="12"/>
+
+                    <StackPanel x:Name="ExperimentalContent" Visibility="Collapsed" Spacing="12">
+                        <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}"/>
+                        <TextBlock Text="{x:Bind svc:Loc.T('set.google')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                        <TextBlock x:Name="GoogleStatusText" TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="GoogleConnectBtn" Click="GoogleConnect_Click"/>
+                            <Button x:Name="GoogleSyncBtn" Content="{x:Bind svc:Loc.T('google.syncnow')}" Click="GoogleSync_Click"/>
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{x:Bind svc:Loc.T('google.auto')}" TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="GoogleAutoSwitch" OnContent="{x:Bind svc:Loc.T('on')}"
+                                          OffContent="{x:Bind svc:Loc.T('off')}" Toggled="GoogleAuto_Toggled"/>
+                        </StackPanel>
+                        <TextBox x:Name="GoogleClientIdBox" FlowDirection="LeftToRight"
+                                 Header="{x:Bind svc:Loc.T('google.clientid')}" LostFocus="GoogleClient_LostFocus"/>
+                        <PasswordBox x:Name="GoogleClientSecretBox" FlowDirection="LeftToRight"
+                                     Header="{x:Bind svc:Loc.T('google.clientsecret')}" LostFocus="GoogleClient_LostFocus"/>
+                        <TextBlock Text="{x:Bind svc:Loc.T('google.hint')}" TextWrapping="Wrap" Opacity="0.6" FontSize="12"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

@@ -21,6 +21,7 @@ public sealed class AppSettings
     public bool ShowHijriInTooltip { get; set; } = true;  // Hijri date in the day hover text and the tray tooltip
     public bool ShowHijriInCells { get; set; } = true;    // small Hijri day in the large calendar's cells
     public bool ShowWeekNumbers { get; set; } = true;     // week-of-year column in the large calendar
+    public bool Experimental { get; set; }                // experimental features (today: Google Calendar sync). Off = nothing of them is shown, created or started
     public string GoogleClientId { get; set; } = "";      // OAuth "Desktop app" client of the person's own Google Cloud project
     public string GoogleClientSecret { get; set; } = "";  // (Google calls it a secret, but a desktop app cannot keep it secret)
     public bool GoogleAutoSync { get; set; } = true;      // sync every 15 minutes and after an edit

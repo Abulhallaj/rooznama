@@ -19,6 +19,8 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- the app is Persian and English only -->
+    <SatelliteResourceLanguages>en;fa</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,5 +44,28 @@
     <PackageReference Include="System.Drawing.Common" Version="8.0.*" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.*" />
   </ItemGroup>
+
+  <!--
+    Packages (Windows App SDK, ...) drop one folder per language next to the exe (af-ZA, de, fr, ...) with *.resources.dll / *.mui
+    files. Only Persian and English are used, so those folders are deleted after build and after publish; the framework falls back to
+    English for any other language. A folder is removed only if it holds such a file and is not en, en-US, fa or fa-IR.
+  -->
+  <Target Name="PruneLanguageFoldersAfterBuild" AfterTargets="Build">
+    <ItemGroup>
+      <_LangFile Include="$(OutDir)*\*.resources.dll;$(OutDir)*\*.mui"
+                 Exclude="$(OutDir)en\*;$(OutDir)en-US\*;$(OutDir)fa\*;$(OutDir)fa-IR\*" />
+      <_LangDir Include="@(_LangFile->'%(RootDir)%(Directory)')" />
+    </ItemGroup>
+    <RemoveDir Directories="@(_LangDir)" />
+  </Target>
+
+  <Target Name="PruneLanguageFoldersAfterPublish" AfterTargets="Publish" Condition="'$(PublishDir)' != ''">
+    <ItemGroup>
+      <_PubLangFile Include="$(PublishDir)*\*.resources.dll;$(PublishDir)*\*.mui"
+                    Exclude="$(PublishDir)en\*;$(PublishDir)en-US\*;$(PublishDir)fa\*;$(PublishDir)fa-IR\*" />
+      <_PubLangDir Include="@(_PubLangFile->'%(RootDir)%(Directory)')" />
+    </ItemGroup>
+    <RemoveDir Directories="@(_PubLangDir)" />
+  </Target>
 
 </Project>

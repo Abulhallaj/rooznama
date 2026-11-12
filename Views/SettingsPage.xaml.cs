@@ -8,6 +8,7 @@ public sealed partial class SettingsPage : Page
 {
     bool _loading = true;
     bool _connecting;
+    bool _googleWired;
     string? _connectError;
 
     public SettingsPage()
@@ -28,15 +29,15 @@ public sealed partial class SettingsPage : Page
         Select(LangBox, s.Language);
         Select(FontBox, s.FontName);
         Select(ThemeBox, s.Theme);
+        ExperimentalSwitch.IsOn = s.Experimental;
         GoogleAutoSwitch.IsOn = s.GoogleAutoSync;
         GoogleClientIdBox.Text = s.GoogleClientId;
         GoogleClientSecretBox.Password = s.GoogleClientSecret;
 
         _loading = false;
 
-        UpdateGoogleUi();
-        App.GoogleSync.StatusChanged += OnGoogleStatus;
-        Unloaded += (_, _) => App.GoogleSync.StatusChanged -= OnGoogleStatus;
+        ShowExperimental(s.Experimental);
+        Unloaded += (_, _) => { if (_googleWired) App.GoogleSync.StatusChanged -= OnGoogleStatus; };
     }
 
     static void Select(ComboBox box, string tag) =>
@@ -87,7 +88,51 @@ public sealed partial class SettingsPage : Page
         App.Tray.Refresh();
     }
 
-    // ---------- Google Calendar ----------
+    // ---------- experimental features (today: Google Calendar) ----------
+    // Off: the section under the switch is collapsed and App.Google / App.GoogleSync are never created.
+    void ShowExperimental(bool on)
+    {
+        ExperimentalContent.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+        if (!on) return;
+        if (!_googleWired)
+        {
+            _googleWired = true;
+            App.GoogleSync.StatusChanged += OnGoogleStatus;
+        }
+        UpdateGoogleUi();
+    }
+
+    async void Experimental_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        if (ExperimentalSwitch.IsOn && !await ConfirmExperimentalAsync())
+        {
+            _loading = true;                    // declined: put the switch back without running this handler again
+            ExperimentalSwitch.IsOn = false;
+            _loading = false;
+            return;
+        }
+        App.Settings.Experimental = ExperimentalSwitch.IsOn;
+        App.Settings.Save();
+        ShowExperimental(ExperimentalSwitch.IsOn);
+        App.GoogleSync.Start();   // starts the timers, or stops them when the experiment is turned off
+    }
+
+    async Task<bool> ConfirmExperimentalAsync()
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = Loc.T("exp.warn.title"),
+            Content = new TextBlock { Text = Loc.T("exp.warn.body"), TextWrapping = TextWrapping.Wrap, MaxWidth = 420 },
+            PrimaryButtonText = Loc.T("exp.warn.ok"),
+            CloseButtonText = Loc.T("exp.warn.cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            FlowDirection = Loc.Flow
+        };
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
     void OnGoogleStatus() => DispatcherQueue.TryEnqueue(UpdateGoogleUi);
 
     void GoogleClient_LostFocus(object sender, RoutedEventArgs e) => Apply();

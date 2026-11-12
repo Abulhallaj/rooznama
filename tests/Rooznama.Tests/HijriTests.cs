@@ -95,4 +95,51 @@ public sealed class HijriTests
             Assert.True((b.Year == a.Year && b.Month == a.Month + 1) || (b.Year == a.Year + 1 && a.Month == 12 && b.Month == 1), $"{a} -> {b}");
         }
     }
+
+    // ---------- Hijri date -> Gregorian day (the converter) ----------
+    sealed class NoHijri : IHijriSource
+    {
+        public HijriDate? TryGet(DateTime date) => null;
+    }
+
+    [Fact]
+    public void A_Hijri_date_is_found_as_its_Gregorian_day()
+    {
+        var provider = new HijriProvider(() => HijriProvider.UtId, RealUt());
+        Assert.Equal(new DateTime(2026, 3, 21), HijriLookup.FindGregorian(new HijriDate(1447, 10, 1), provider));   // Eid al-Fitr 1447
+        Assert.Equal(new DateTime(2026, 6, 25), HijriLookup.FindGregorian(new HijriDate(1448, 1, 10), provider));   // Ashura 1448
+    }
+
+    [Fact]
+    public void Every_day_of_two_years_goes_to_its_Hijri_date_and_back_with_both_sources()
+    {
+        foreach (var source in new[] { HijriProvider.UtId, HijriProvider.UmAlQuraId })
+        {
+            var provider = new HijriProvider(() => source, RealUt());
+            for (var d = new DateTime(2025, 1, 1); d <= new DateTime(2026, 12, 31); d = d.AddDays(1))
+            {
+                var h = provider.Get(d, out _)!.Value;
+                Assert.True(HijriLookup.FindGregorian(h, provider) == d, $"{source} {d:yyyy-MM-dd} {h}");
+            }
+        }
+    }
+
+    [Fact]
+    public void Impossible_Hijri_dates_have_no_Gregorian_day()
+    {
+        var provider = new HijriProvider(() => HijriProvider.UtId, RealUt());
+        Assert.Null(HijriLookup.FindGregorian(new HijriDate(1447, 13, 1), provider));
+        Assert.Null(HijriLookup.FindGregorian(new HijriDate(1447, 1, 31), provider));
+        Assert.Null(HijriLookup.FindGregorian(new HijriDate(0, 1, 1), provider));
+
+        // day 30 of a month that has only 29 days
+        var day = new DateTime(2026, 1, 1);
+        while (!(provider.Get(day, out _)!.Value.Day == 29 && provider.Get(day.AddDays(1), out _)!.Value.Day == 1)) day = day.AddDays(1);
+        var h = provider.Get(day, out _)!.Value;
+        Assert.Null(HijriLookup.FindGregorian(h with { Day = 30 }, provider));
+
+        // a provider that knows nothing finds nothing
+        var empty = new HijriProvider(() => HijriProvider.UtId, new NoHijri(), new NoHijri());
+        Assert.Null(HijriLookup.FindGregorian(new HijriDate(1447, 10, 1), empty));
+    }
 }
