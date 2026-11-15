@@ -399,6 +399,8 @@ public sealed class TrayService : IDisposable
         var text = PersianDate.Full(today);
         if (App.Settings.ShowGregorianInTooltip)
             text += "\n" + today.ToString("dddd, dd MMMM yyyy", CultureInfo.InvariantCulture);
+        if (App.Settings.ShowHijriInTooltip && HijriService.Get(today) is { } hijri)
+            text += "\n" + HijriService.Full(hijri);
         if (text.Length > 127) text = text[..127];
 
         IntPtr newIcon;

@@ -229,14 +229,22 @@ public sealed partial class CalendarPanel : UserControl
             FontWeight = FontWeights.SemiBold,
             HorizontalAlignment = HorizontalAlignment.Center
         });
-        sp.Children.Add(new TextBlock
+        var sub = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, HorizontalAlignment = HorizontalAlignment.Center };
+        sub.Children.Add(new TextBlock
         {
             Text = date.Day == 1 ? date.ToString("d MMM", CultureInfo.InvariantCulture)
                                  : date.Day.ToString(CultureInfo.InvariantCulture),
             FontSize = 11,
-            Opacity = 0.65,
-            HorizontalAlignment = HorizontalAlignment.Center
+            Opacity = 0.65
         });
+        if (App.Settings.ShowHijriInCells && HijriService.Get(date) is { } h)
+            sub.Children.Add(new TextBlock
+            {
+                Text = h.Day == 1 ? HijriService.MonthName(h.Month) : HijriService.Num(h.Day),   // Arabic digits
+                FontSize = 11,
+                Opacity = 0.65
+            });
+        sp.Children.Add(sub);
         b.Content = sp;
         b.Click += Cell_Click;
         return b;
