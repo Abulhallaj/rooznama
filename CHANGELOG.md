@@ -4,6 +4,20 @@ All notable changes to **Rooznama (روزنما)** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+
+## [0.8.0] - 2026-11-11
+### Added
+- **Hijri (qamari) dates.** Shown in the day hover text and the tray tooltip (Settings: "Show the Hijri date in tooltips") and as a small day in the large calendar's cells, with the month name on the 1st (Settings: "Show the Hijri day in calendar cells"). Hijri numbers use **Arabic digits** (٠١٢٣…), not Persian ones.
+- **Hijri source choice** in Settings > Calendar: *Tehran University Calendar Center* (official Iranian dates, `calendar/hijri/ut.json`) or *Umm al-Qura* (`UmAlQuraCalendar`). **Umm al-Qura is used automatically for any day the selected source does not cover**, so every date always has a Hijri date. `calendar/sources/extract-hijri-anchors.mjs` builds the official data from the Tehran University yearly calendars; it ships with 12 verified Jalali years (1384, 1391, 1393, 1395, 1397-1401, 1403-1405). Years whose text fails the checks are skipped, and five unreadable rows were repaired where the neighbouring Hijri days force the value (`repairedDays`). Adding a year only needs its `Calendar-<year>.norm.txt` and a re-run.
+- **Hijri in the converter**: convert between Shamsi, Gregorian and Hijri dates; the Hijri date follows the selected source.
+- Tests for the Hijri sources, the shipped data and the Hijri-to-Gregorian lookup.
+
+### Changed
+- The build output ships only the Persian and English language folders (`SatelliteResourceLanguages`, plus a clean-up of the `*.mui` and `*.resources.dll` folders the Windows App SDK leaves after build and publish).
+
+### Notes
+- Hijri dates after the last official calendar (currently 20 March 2027) come from Umm al-Qura and can differ from Iran's official calendar by a day.
+
 ## [0.7.0] - 2026-11-03
 ### Added
 - **Official holidays and observances** (Jalali years 1383-1405) from the bundled calendar dataset, based on FarsiUI's calendar data (credited in `THIRD-PARTY-NOTICES.md`). Holiday days turn red in the calendar, hovering a day lists its occasions, and the area under the calendar shows the selected day's holidays and observances separately. Works fully offline; the data ships in the `calendar` folder next to the exe.

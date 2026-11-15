@@ -35,6 +35,7 @@
 - پنجره اصلی: تقویم بزرگ با روز میلادی کنار هر روز، مبدل تاریخ شمسی ↔ میلادی، تنظیمات، درباره
 - فارسی (پیش‌فرض) و انگلیسی، فونت وزیرمتن، تم خودکار / روشن / تیره
 - تعطیلات رسمی و مناسبت‌ها (۱۳۸۳ تا ۱۴۰۵، آفلاین؛ داده‌ها بر پایه‌ی سایت رسمی مرکز تقویم دانشگاه تهران. ساختار رویدادها از [تقویم FarsiUI](https://farsiui.ir/calendar)) وام گرفته شده است.
+- تاریخ قمری (با ارقام عربی) از تقویم رسمی مرکز تقویم دانشگاه تهران یا ام‌القری (قابل انتخاب در تنظیمات)؛ تبدیل تاریخ شمسی، میلادی و قمری در صفحه تبدیل
 - اجرا با ویندوز (اختیاری)
 
 ### دانلود
@@ -76,7 +77,7 @@ dotnet publish -c Release -r win-x64 --self-contained -p:WindowsAppSDKSelfContai
 - پرتابل: پوشه `data` کنار برنامه
 
 ### نقشه راه
-تاریخ قمری، اتصال به Google Calendar، به‌روزرسانی آنلاین داده‌های مناسبت‌ها.
+اتصال به Google Calendar، به‌روزرسانی آنلاین داده‌های مناسبت‌ها.
 
 ---
 
@@ -92,6 +93,7 @@ Rooznama shows the Shamsi (Jalali) day number on a system-tray icon. Hover for t
 - Main window: large calendar with the Gregorian day beside each day, Shamsi ↔ Gregorian converter, settings, about
 - Persian (default) and English, Vazirmatn font, automatic / light / dark theme
 - Official holidays and observances for 1383–1405, offline (data based on the [FarsiUI calendar](https://farsiui.ir/calendar))
+- Hijri dates (Arabic digits) from the official Tehran University calendars or Umm al-Qura, selectable in Settings; Shamsi, Gregorian and Hijri conversion
 - Optional start with Windows
 
 ### Download
@@ -140,8 +142,9 @@ ShellWindow              main window (navigation)
 Views/                   CalendarPanel, CalendarPage, ConverterPage, SettingsPage, SupportPage, AboutPage
 Services/                TrayService (Shell_NotifyIcon), PersianDate, Loc (fa/en), AppSettings,
                          UpdateService, AppInfo, AppPaths, DayInfo, CalendarEvents (provider hook),
-                         CalendarEventService + CalendarEventModels (holidays/observances), Log
-calendar/                bundled holidays and observances (JSON, copied next to the exe)
+                         CalendarEventService + CalendarEventModels (holidays/observances),
+                         HijriService + HijriSources, Log
+calendar/                bundled holidays, observances and Hijri data (JSON, copied next to the exe)
 tests/                   xunit tests for the calendar data service
 TipWindow                right-to-left tray tooltip
 installer/               Inno Setup script (used by CI)
@@ -149,7 +152,7 @@ Assets/                  icons, fonts
 ```
 
 ### Roadmap
-Hijri/lunar dates, Google Calendar integration, online updates of the occasions data.
+Google Calendar integration, online updates of the occasions data.
 
 ### License
 [MIT](LICENSE). Third-party components: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
