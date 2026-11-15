@@ -18,6 +18,8 @@
   <ItemGroup>
     <Compile Include="..\..\Services\CalendarEventModels.cs" Link="Linked\CalendarEventModels.cs" />
     <Compile Include="..\..\Services\CalendarEventService.cs" Link="Linked\CalendarEventService.cs" />
+    <Compile Include="..\..\Services\HijriDate.cs" Link="Linked\HijriDate.cs" />
+    <Compile Include="..\..\Services\HijriSources.cs" Link="Linked\HijriSources.cs" />
   </ItemGroup>
 
   <!-- the real dataset, copied next to the test assembly as calendar\ -->
@@ -25,6 +27,7 @@
     <Content Include="..\..\calendar\meta.json" Link="calendar\meta.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\calendar\years\**\holidays.json" Link="calendar\years\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\calendar\years\**\events.json" Link="calendar\years\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\calendar\hijri\ut.json" Link="calendar\hijri\ut.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
