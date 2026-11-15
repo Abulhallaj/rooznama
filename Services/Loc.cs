@@ -26,6 +26,12 @@ public static class Loc
 
         ["conv.shamsi"] = ("تاریخ شمسی", "Shamsi (Jalali) date"),
         ["conv.gregorian"] = ("تاریخ میلادی", "Gregorian date"),
+        ["conv.hijri"] = ("تاریخ قمری", "Hijri date"),
+        ["conv.hijri.year"] = ("سال", "Year"),
+        ["conv.hijri.month"] = ("ماه", "Month"),
+        ["conv.hijri.day"] = ("روز", "Day"),
+        ["conv.hijri.none"] = ("— (خارج از بازه)", "— (out of range)"),
+        ["conv.hijri.invalid"] = ("تاریخ قمری نامعتبر", "Invalid Hijri date"),
         ["copy"] = ("کپی", "Copy"),
 
         ["set.appearance"] = ("ظاهر", "Appearance"),
@@ -80,6 +86,15 @@ public static class Loc
         ["upd.download"] = ("دانلود", "Download"),
         ["upd.failed"] = ("بررسی انجام نشد (اتصال اینترنت؟)", "Couldn't check (no internet?)"),
         ["upd.dev"] = ("نسخه توسعه است؛ بررسی به‌روزرسانی غیرفعال است.", "Development build; update check is disabled."),
+
+        ["set.cal"] = ("تقویم", "Calendar"),
+        ["set.hijri.source"] = ("منبع تاریخ قمری", "Hijri date source"),
+        ["hijri.ut"] = ("مرکز تقویم دانشگاه تهران (رسمی ایران)", "Tehran University Calendar Center (official Iran)"),
+        ["hijri.umalqura"] = ("ام‌القری (UmAlQuraCalendar)", "Umm al-Qura (UmAlQuraCalendar)"),
+        ["set.hijri.note"] = ("برای روزهایی که منبع انتخاب‌شده داده ندارد (مثلاً سال‌های بعد از آخرین تقویم رسمی) به‌طور خودکار از ام‌القری استفاده می‌شود؛ ممکن است تا یک روز با تقویم رسمی ایران اختلاف داشته باشد.",
+                           "Days the selected source does not cover (for example years after the latest official calendar) automatically use Umm al-Qura, which can differ from Iran's official calendar by a day."),
+        ["set.hijri.tip"] = ("نمایش تاریخ قمری در Tooltip", "Show the Hijri date in tooltips"),
+        ["set.hijri.cells"] = ("نمایش روز قمری در خانه‌های تقویم", "Show the Hijri day in calendar cells"),
     };
 
     public static string T(string key) => S.TryGetValue(key, out var v) ? (IsFa ? v.Fa : v.En) : key;
