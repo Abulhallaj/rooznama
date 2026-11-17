@@ -277,3 +277,193 @@ public sealed class PersonalEventStoreTests : IDisposable
         Assert.False(File.Exists(FilePath + ".tmp"));
     }
 }
+
+public sealed class PersonalEventStoreSyncTests : IDisposable
+{
+    readonly string _dir = Path.Combine(Path.GetTempPath(), "rooznama-events-sync-" + Guid.NewGuid().ToString("N"));
+    string FilePath => Path.Combine(_dir, "personal-events.json");
+    PersonalEventStore NewStore() => new(FilePath);
+
+    public void Dispose() { try { Directory.Delete(_dir, true); } catch { } }
+
+    static PersonalEvent Make(string title) =>
+        new() { Title = title, IsAllDay = true, Start = new DateTime(2026, 11, 5), End = new DateTime(2026, 11, 6) };
+
+    [Fact]
+    public void Pending_lists_what_still_has_to_be_sent()
+    {
+        var store = NewStore();
+        var fresh = Make("جدید");
+        var synced = Make("همگام");
+        var removed = Make("حذف");
+        removed.ExternalId = "g-removed";
+        store.Save(fresh);
+        store.Save(synced);
+        store.Save(removed);
+        store.ApplySync(synced.Id, store.Get(synced.Id)!.UpdatedUtc, p => p.ExternalId = "g-synced");
+        store.Delete(removed.Id);
+
+        var (upload, delete) = store.Pending();
+        Assert.Equal(new[] { fresh.Id }, upload.Select(e => e.Id));
+        Assert.Equal(new[] { removed.Id }, delete.Select(e => e.Id));
+    }
+
+    [Fact]
+    public void ApplySync_marks_the_event_synced_unless_the_person_edited_it_meanwhile()
+    {
+        var store = NewStore();
+        var e = Make("الف");
+        store.Save(e);
+
+        var seen = store.Get(e.Id)!.UpdatedUtc;                      // what the sync was working on
+        var edit = store.Get(e.Id)!;
+        edit.Title = "ب";
+        Thread.Sleep(20);
+        store.Save(edit);                                            // an edit while the sync was running
+
+        Assert.True(store.ApplySync(e.Id, seen, p => p.ExternalId = "g1"));
+        var after = store.Get(e.Id)!;
+        Assert.Equal("g1", after.ExternalId);                        // the remote id is recorded ...
+        Assert.Equal(EventSyncState.PendingUpload, after.SyncState); // ... but the newer edit still has to be sent
+        Assert.Equal("ب", after.Title);
+
+        Assert.True(store.ApplySync(e.Id, after.UpdatedUtc, _ => { }));
+        Assert.Equal(EventSyncState.Synced, store.Get(e.Id)!.SyncState);
+    }
+
+    [Fact]
+    public void ApplySync_import_and_purge_are_silent_and_notify_does_the_telling()
+    {
+        var store = NewStore();
+        int changed = 0, edited = 0;
+        store.Changed += () => changed++;
+        store.Edited += () => edited++;
+
+        var e = Make("الف");
+        store.Save(e);
+        Assert.Equal((1, 1), (changed, edited));
+
+        store.ApplySync(e.Id, store.Get(e.Id)!.UpdatedUtc, p => p.ExternalId = "g1");
+        store.Import(new PersonalEvent { Title = "از گوگل", Origin = "google", ExternalId = "g2", SyncState = EventSyncState.Synced });
+        store.Purge(e.Id);
+        Assert.Equal((1, 1), (changed, edited));
+
+        store.NotifyChanged();
+        Assert.Equal((2, 1), (changed, edited));
+    }
+
+    [Fact]
+    public void Import_replaces_an_event_with_the_same_id_and_keeps_its_creation_time()
+    {
+        var store = NewStore();
+        var e = Make("الف");
+        store.Save(e);
+        var created = store.Get(e.Id)!.CreatedUtc;
+
+        var replacement = Make("ب");
+        replacement.Id = e.Id;
+        replacement.CreatedUtc = DateTime.UtcNow.AddDays(5);
+        Assert.True(store.Import(replacement));
+
+        var back = Assert.Single(store.Snapshot());
+        Assert.Equal("ب", back.Title);
+        Assert.Equal(created, back.CreatedUtc);
+    }
+
+    [Fact]
+    public void Purge_removes_even_a_tombstone()
+    {
+        var store = NewStore();
+        var e = Make("الف");
+        e.ExternalId = "g1";
+        store.Save(e);
+        store.Delete(e.Id);
+        Assert.Single(store.Snapshot());
+
+        Assert.True(store.Purge(e.Id));
+        Assert.Empty(store.Snapshot());
+        Assert.False(store.Purge(e.Id));
+        Assert.Empty(NewStore().Snapshot());
+    }
+
+    [Fact]
+    public void An_event_with_yearly_occurrences_at_Google_also_leaves_a_tombstone()
+    {
+        var store = NewStore();
+        var e = Make("الف");
+        e.RemoteInstances = new Dictionary<string, string> { ["20270321"] = "g7" };
+        store.Save(e);
+        store.Delete(e.Id);
+
+        var (_, delete) = store.Pending();
+        Assert.Equal(new[] { e.Id }, delete.Select(x => x.Id));
+        Assert.Equal("g7", delete.Single().RemoteInstances!["20270321"]);
+    }
+
+    [Fact]
+    public void A_clone_has_its_own_remote_instances()
+    {
+        var e = Make("الف");
+        e.RemoteInstances = new Dictionary<string, string> { ["20270321"] = "g7" };
+        var copy = e.Clone();
+        copy.RemoteInstances!["20280320"] = "g8";
+        Assert.Single(e.RemoteInstances);
+    }
+
+    [Fact]
+    public void ResetRemoteLinks_forgets_the_old_account()
+    {
+        var store = NewStore();
+        var mine = Make("من");
+        mine.ExternalId = "g1";
+        mine.ETag = "e1";
+        mine.CalendarId = "primary";
+        store.Save(mine);
+        store.ApplySync(mine.Id, store.Get(mine.Id)!.UpdatedUtc, _ => { });
+        store.Import(new PersonalEvent { Title = "از گوگل", Origin = "google", ExternalId = "g2", SyncState = EventSyncState.Synced });
+        var gone = Make("حذف‌شده");
+        gone.ExternalId = "g3";
+        store.Save(gone);
+        store.Delete(gone.Id);
+
+        Assert.True(store.ResetRemoteLinks());
+
+        var left = Assert.Single(store.Snapshot());       // the imported event and the tombstone are gone
+        Assert.Equal("من", left.Title);
+        Assert.Null(left.ExternalId);
+        Assert.Null(left.ETag);
+        Assert.Null(left.CalendarId);
+        Assert.Equal(EventSyncState.LocalOnly, left.SyncState);   // it will be sent as a new event
+    }
+
+    [Fact]
+    public void The_new_fields_survive_a_restart()
+    {
+        var store = NewStore();
+        var e = Make("الف");
+        e.Origin = "google";
+        e.RecurringEventId = "master";
+        e.RemoteInstances = new Dictionary<string, string> { ["20270321"] = "g7" };
+        store.Save(e);
+
+        var back = Assert.Single(NewStore().Snapshot());
+        Assert.Equal("google", back.Origin);
+        Assert.Equal("master", back.RecurringEventId);
+        Assert.Equal("g7", back.RemoteInstances!["20270321"]);
+    }
+
+    [Fact]
+    public void An_old_file_without_the_new_fields_still_loads()
+    {
+        Directory.CreateDirectory(_dir);
+        File.WriteAllText(FilePath, """
+            { "schemaVersion": 1, "events": [ { "id": "x", "title": "قدیمی", "isAllDay": true,
+              "start": "2026-11-05T00:00:00", "end": "2026-11-06T00:00:00", "syncState": "LocalOnly" } ] }
+            """);
+
+        var e = Assert.Single(NewStore().All());
+        Assert.Equal("local", e.Origin);
+        Assert.Null(e.RemoteInstances);
+        Assert.Equal("قدیمی", e.Title);
+    }
+}
