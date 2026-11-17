@@ -40,6 +40,14 @@
 - رویدادهای شخصی (تمام‌روز یا ساعت‌دار، با تکرار سالانه اختیاری) و، آزمایشی و به‌طور پیش‌فرض خاموش، همگام‌سازی دو‌طرفه با Google Calendar (از تنظیمات ← امکانات آزمایشی؛ با OAuth client خودتان؛ راهنما در پایین)
 - اجرا با ویندوز (اختیاری)
 
+### اتصال به تقویم گوگل
+۱. در [Google Cloud Console](https://console.cloud.google.com/) یک پروژه بسازید و **Google Calendar API** را فعال کنید.
+۲. در «OAuth consent screen» برنامه را (External / Testing) تعریف کنید و حساب گوگل خودتان را در «Test users» اضافه کنید.
+۳. در «Credentials» یک **OAuth client ID** از نوع **Desktop app** بسازید.
+۴. در روزنما: تنظیمات ← امکانات آزمایشی ← فعال‌سازی اتصال به تقویم گوگل؛ سپس در بخش «تقویم گوگل» Client ID و secret را وارد و «اتصال به گوگل» را بزنید؛ مرورگر باز می‌شود و پس از تأیید دسترسی، همگام‌سازی شروع می‌شود.
+
+رویدادها با تقویم اصلی گوگل (از یک سال قبل تا دو سال بعد) دو‌طرفه همگام می‌شوند. توکن دسترسی رمزنگاری‌شده برای کاربر جاری ویندوز نگه‌داری می‌شود. تا وقتی پروژه در حالت Testing است، توکن‌ها پس از ۷ روز منقضی می‌شوند و دوباره باید متصل شد. اگر نسخه‌ای را برای همه منتشر می‌کنید، می‌توانید فایل `google-client.json` (`{ "clientId": "...", "clientSecret": "..." }`) را کنار exe بگذارید.
+
 ### دانلود
 از بخش [Releases](https://github.com/Abulhallaj/rooznama/releases) یکی از چهار فایل را بگیرید (همه بدون نیاز به نصب .NET یا چیز دیگری کار می‌کنند):
 
@@ -79,7 +87,7 @@ dotnet publish -c Release -r win-x64 --self-contained -p:WindowsAppSDKSelfContai
 - پرتابل: پوشه `data` کنار برنامه
 
 ### نقشه راه
-اتصال به Google Calendar، به‌روزرسانی آنلاین داده‌های مناسبت‌ها.
+به‌روزرسانی آنلاین داده‌های مناسبت‌ها.
 
 ---
 
@@ -99,6 +107,14 @@ Rooznama shows the Shamsi (Jalali) day number on a system-tray icon. Hover for t
 - Fixed occasions per calendar (Shamsi, Hijri, Gregorian) fill in for years after 1405; week numbers, arrow-key navigation and a light red holiday background in the main calendar (the tray flyout is unchanged)
 - Personal events (all-day or timed, optional yearly repeat) and, experimental and off by default, two-way Google Calendar sync (Settings > Experimental features; needs your own Google Cloud OAuth client, see below)
 - Optional start with Windows
+
+### Google Calendar
+1. In the [Google Cloud Console](https://console.cloud.google.com/) create a project and enable the **Google Calendar API**.
+2. Set up the OAuth consent screen (External / Testing) and add your Google account under *Test users*.
+3. Under *Credentials* create an **OAuth client ID** of type **Desktop app**.
+4. In Rooznama: Settings > Experimental features > enable Google Calendar sync; then in the *Google Calendar* section enter the Client ID and secret and press *Connect to Google*. The browser opens; after you allow access the sync starts.
+
+Personal events sync both ways with your primary Google calendar (one year back to two years ahead). The refresh token is stored encrypted for the current Windows user. While the project is in *Testing* mode Google expires refresh tokens after 7 days, so you will have to connect again. If you distribute a build to others, put a `google-client.json` (`{ "clientId": "...", "clientSecret": "..." }`) next to the exe; publishing for everyone needs Google's verification of the `calendar.events` scope.
 
 ### Download
 Get one of the four files from [Releases](https://github.com/Abulhallaj/rooznama/releases). All of them are self-contained: no .NET or other prerequisites to install.
@@ -157,7 +173,7 @@ Assets/                  icons, fonts
 ```
 
 ### Roadmap
-Google Calendar integration, online updates of the occasions data.
+Online updates of the occasions data.
 
 ### License
 [MIT](LICENSE). Third-party components: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

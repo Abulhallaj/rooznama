@@ -4,6 +4,16 @@ All notable changes to **Rooznama (روزنما)** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Added (experimental google calendar sync)
+- **Google Calendar sync**, experimental and **off by default**. Settings > Experimental features shows nothing until its switch is turned on; turning it on warns that these features are not part of an official release and then reveals the Google Calendar section. With it off nothing Google is shown, created, read from disk or started (no timers, no network).
+  - Sign-in uses the system browser with a loopback redirect and PKCE; the refresh token is stored encrypted for the current Windows user (DPAPI). It needs an OAuth client of type *Desktop app* from your own Google Cloud project (Client ID and secret are entered in Settings, or shipped as `google-client.json` next to the exe); the requested access is `calendar.events` plus the e-mail address for display.
+  - Two-way sync with the primary calendar over one year back to two years ahead, every 15 minutes, a few seconds after an edit and on demand. A Gregorian yearly event is kept at Google as one event with an RRULE; a Shamsi or Hijri yearly event is sent as one event per year in the window. A step that fails stays pending and is retried; an event half-sent when the connection dropped is recognised by a private marker instead of being duplicated; if more than half of the synced events suddenly look deleted at Google, nothing is removed here.
+  - Connecting a different Google account forgets the old account's links; disconnecting keeps all events.
+- Tests for the personal event store, the Google event mapping, the HTTP client and the whole sync (against an in-memory fake Google).
+
+### Notes
+- While the Google Cloud project is in *Testing* mode only the test users you add can sign in, and Google expires their refresh tokens after 7 days. Publishing for everyone needs Google's verification of the `calendar.events` scope.
+
 ### Added (experimental personal event)
 - **Personal events** in the main calendar: add, edit and delete (all-day or timed, with notes and an optional yearly repetition by the Shamsi, Hijri or Gregorian date). They are stored in `personal-events.json` next to `settings.json` (atomic writes; a damaged file is kept as `.bad`; a file from a newer version is never overwritten). The model already carries what Google Calendar needs (remote id, etag, sync state, Gregorian wall-clock times with an exclusive all-day end, an RRULE for Gregorian yearly events, deletion tombstones).
 
