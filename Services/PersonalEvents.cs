@@ -56,13 +56,26 @@ public sealed class PersonalEvent
     /// <summary>A tombstone: removed locally but not yet removed from the remote calendar.</summary>
     [JsonPropertyName("isDeleted")] public bool IsDeleted { get; set; }
 
+    // --- remote calendar details ---
+    /// <summary>"local" (made in Rooznama) or "google" (imported from Google Calendar).</summary>
+    [JsonPropertyName("origin")] public string Origin { get; set; } = "local";
+    /// <summary>An imported occurrence of a repeating Google event: the id of the repeating event.</summary>
+    [JsonPropertyName("recurringEventId")] public string? RecurringEventId { get; set; }
+    /// <summary>A Jalali or Hijri yearly event is sent to Google as one event per year: "yyyyMMdd" of the day -> Google event id.</summary>
+    [JsonPropertyName("remoteInstances")] public Dictionary<string, string>? RemoteInstances { get; set; }
+
     DateTime _start = Wall(DateTime.Today);
     DateTime _end = Wall(DateTime.Today.AddDays(1));
 
     // wall-clock time without a UTC offset, so a file moved to another time zone still shows the same times
     static DateTime Wall(DateTime d) => DateTime.SpecifyKind(d, DateTimeKind.Unspecified);
 
-    public PersonalEvent Clone() => (PersonalEvent)MemberwiseClone();
+    public PersonalEvent Clone()
+    {
+        var c = (PersonalEvent)MemberwiseClone();
+        if (RemoteInstances is not null) c.RemoteInstances = new Dictionary<string, string>(RemoteInstances);
+        return c;
+    }
 }
 
 public sealed class PersonalEventFile
@@ -107,8 +120,11 @@ public sealed class PersonalEventStore
     List<PersonalEvent> _items = new();
     bool _readOnly;
 
-    /// <summary>Raised (on the calling thread) after a successful save or delete.</summary>
+    /// <summary>Raised (on the calling thread) after anything in the store changed: a save, a delete or a sync. Refresh the display on this.</summary>
     public event Action? Changed;
+
+    /// <summary>Raised after the user's own save or delete (not after a sync); this is what asks for a sync.</summary>
+    public event Action? Edited;
 
     public PersonalEventStore(string path, Action<string>? log = null)
     {
@@ -185,11 +201,12 @@ public sealed class PersonalEventStore
             ev.SyncState = ev.ExternalId is null ? EventSyncState.LocalOnly : EventSyncState.PendingUpload;
             if (!Write()) return false;
         }
+        Edited?.Invoke();
         Changed?.Invoke();
         return true;
     }
 
-    /// <summary>Removes an event. One that already exists remotely stays as a tombstone until the deletion has been sent.</summary>
+    /// <summary>Removes an event. One that already exists remotely (one event or its yearly occurrences) stays as a tombstone until the deletion has been sent.</summary>
     public bool Delete(string id)
     {
         lock (_gate)
@@ -197,9 +214,9 @@ public sealed class PersonalEventStore
             if (_readOnly) return false;
             int i = _items.FindIndex(x => x.Id == id);
             if (i < 0) return false;
-            if (_items[i].ExternalId is null)
+            if (_items[i].ExternalId is null && _items[i].RemoteInstances is not { Count: > 0 })
             {
-                _items.RemoveAt(i);
+                _items.RemoveAt(i);   // never sent anywhere: nothing to tell the remote calendar
             }
             else
             {
@@ -211,6 +228,7 @@ public sealed class PersonalEventStore
             }
             if (!Write()) return false;
         }
+        Edited?.Invoke();
         Changed?.Invoke();
         return true;
     }
@@ -239,27 +257,117 @@ public sealed class PersonalEventStore
         lock (_gate) snapshot = _items.Where(e => !e.IsDeleted).ToList();
 
         var result = new List<PersonalEventInstance>();
-        foreach (var e in snapshot)
-        {
-            if (e.Recurrence == EventRecurrence.None)
-            {
-                if (e.Start < to && (e.End > from || e.Start >= from)) result.Add(new PersonalEventInstance(e, e.Start, e.End));
-                continue;
-            }
-
-            var duration = e.End - e.Start;
-            var last = (to > from ? to.AddTicks(-1) : from).Date;
-            int guard = 0;
-            for (var d = from.Date; d <= last && guard++ < 400; d = d.AddDays(1))
-            {
-                if (d < e.Start.Date) continue;
-                if (EventRecurrenceFields.Of(d, e.Recurrence, hijri) is not { } f) continue;
-                if (f.Month != e.RecurrenceMonth || f.Day != e.RecurrenceDay) continue;
-                var start = d + e.Start.TimeOfDay;
-                result.Add(new PersonalEventInstance(e, start, start + duration));
-            }
-        }
+        foreach (var e in snapshot) result.AddRange(Expand(e, from, to, hijri));
         result.Sort((a, b) => a.Start.CompareTo(b.Start));
         return result;
     }
+
+    /// <summary>The occurrences of one event that overlap [from, to).</summary>
+    public static IReadOnlyList<PersonalEventInstance> Expand(PersonalEvent e, DateTime from, DateTime to, Func<DateTime, HijriDate?> hijri)
+    {
+        var result = new List<PersonalEventInstance>();
+        if (e.Recurrence == EventRecurrence.None)
+        {
+            if (e.Start < to && (e.End > from || e.Start >= from)) result.Add(new PersonalEventInstance(e, e.Start, e.End));
+            return result;
+        }
+
+        var duration = e.End - e.Start;
+        var last = (to > from ? to.AddTicks(-1) : from).Date;
+        int guard = 0;
+        for (var d = from.Date; d <= last && guard++ < 4000; d = d.AddDays(1))
+        {
+            if (d < e.Start.Date) continue;
+            if (EventRecurrenceFields.Of(d, e.Recurrence, hijri) is not { } f) continue;
+            if (f.Month != e.RecurrenceMonth || f.Day != e.RecurrenceDay) continue;
+            var start = d + e.Start.TimeOfDay;
+            result.Add(new PersonalEventInstance(e, start, start + duration));
+        }
+        return result;
+    }
+
+    // ---------- used by the Google sync (they never count as the user's own edits) ----------
+
+    /// <summary>Everything including tombstones, as copies.</summary>
+    public IReadOnlyList<PersonalEvent> Snapshot()
+    {
+        lock (_gate) return _items.Select(e => e.Clone()).ToList();
+    }
+
+    /// <summary>What still has to be sent: new or changed events, and deletions of events that exist remotely.</summary>
+    public (IReadOnlyList<PersonalEvent> Upload, IReadOnlyList<PersonalEvent> Delete) Pending()
+    {
+        lock (_gate)
+            return (_items.Where(e => !e.IsDeleted && e.SyncState is EventSyncState.LocalOnly or EventSyncState.PendingUpload).Select(e => e.Clone()).ToList(),
+                    _items.Where(e => e.IsDeleted && e.SyncState == EventSyncState.PendingDelete).Select(e => e.Clone()).ToList());
+    }
+
+    /// <summary>
+    /// Records what a sync step did to an event (remote id, etag ...). The event becomes Synced, unless the user changed it
+    /// after <paramref name="expectedUpdatedUtc"/>: then that newer edit stays pending. Silent: call <see cref="NotifyChanged"/> afterwards.
+    /// </summary>
+    public bool ApplySync(string id, DateTime expectedUpdatedUtc, Action<PersonalEvent> change)
+    {
+        lock (_gate)
+        {
+            if (_readOnly) return false;
+            int i = _items.FindIndex(x => x.Id == id);
+            if (i < 0) return false;
+            var updated = _items[i].Clone();
+            bool editedMeanwhile = updated.UpdatedUtc != expectedUpdatedUtc;
+            change(updated);
+            updated.SyncState = editedMeanwhile ? EventSyncState.PendingUpload : EventSyncState.Synced;
+            _items[i] = updated;
+            return Write();
+        }
+    }
+
+    /// <summary>Adds an event that came from the remote calendar, or replaces the one with the same id (its creation time is kept). Silent.</summary>
+    public bool Import(PersonalEvent ev)
+    {
+        lock (_gate)
+        {
+            if (_readOnly) return false;
+            int i = _items.FindIndex(x => x.Id == ev.Id);
+            if (i >= 0) { ev.CreatedUtc = _items[i].CreatedUtc; _items[i] = ev; }
+            else _items.Add(ev);
+            return Write();
+        }
+    }
+
+    /// <summary>Removes an event completely, a tombstone included. Silent.</summary>
+    public bool Purge(string id)
+    {
+        lock (_gate)
+        {
+            if (_readOnly) return false;
+            if (_items.RemoveAll(x => x.Id == id) == 0) return false;
+            return Write();
+        }
+    }
+
+    /// <summary>
+    /// For a different Google account: events imported from the old account go, everything made here forgets its remote ids and
+    /// becomes new again. Silent.
+    /// </summary>
+    public bool ResetRemoteLinks()
+    {
+        lock (_gate)
+        {
+            if (_readOnly) return false;
+            _items.RemoveAll(e => e.Origin == "google" || e.IsDeleted);
+            foreach (var e in _items)
+            {
+                e.ExternalId = null;
+                e.CalendarId = null;
+                e.ETag = null;
+                e.RemoteInstances = null;
+                e.SyncState = EventSyncState.LocalOnly;
+            }
+            return Write();
+        }
+    }
+
+    /// <summary>Raises <see cref="Changed"/> after a sync has finished changing things.</summary>
+    public void NotifyChanged() => Changed?.Invoke();
 }
