@@ -36,7 +36,13 @@ public sealed partial class MainCalendarView : UserControl
         FocusVisualPrimaryThickness = new Thickness(0);
         FocusVisualSecondaryThickness = new Thickness(0);
         KeyDown += Panel_KeyDown;
-        Loaded += (_, _) => FocusSelected(false);
+        Loaded += (_, _) =>
+        {
+            App.PersonalEvents.Changed -= OnPersonalEventsChanged;   // never twice, however often the page is shown
+            App.PersonalEvents.Changed += OnPersonalEventsChanged;
+            FocusSelected(false);
+        };
+        Unloaded += (_, _) => App.PersonalEvents.Changed -= OnPersonalEventsChanged;
         ApplyMode();
         ShowToday();
     }
@@ -447,6 +453,25 @@ public sealed partial class MainCalendarView : UserControl
                 }
             Focus(FocusState.Programmatic);
         });
+    }
+
+    // a Google sync (on a background thread) or an edit changed the events
+    void OnPersonalEventsChanged() => DispatcherQueue.TryEnqueue(() => _ = LoadEventsAsync(_selected.Date));
+
+    // ---------- personal events ----------
+    async void AddEvent_Click(object sender, RoutedEventArgs e) => await EditEventAsync(null);
+
+    async void Event_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is CalendarEvent { IsReadOnly: false, Id: { } id } && App.PersonalEvents.Get(id) is { } existing)
+            await EditEventAsync(existing);
+    }
+
+    async Task EditEventAsync(PersonalEvent? existing)
+    {
+        if (XamlRoot is null) return;
+        var outcome = await PersonalEventDialog.ShowAsync(XamlRoot, existing, _selected);
+        if (outcome != PersonalEventDialog.Outcome.Cancelled) await LoadEventsAsync(_selected.Date);
     }
 
     async Task LoadEventsAsync(DateTime day)

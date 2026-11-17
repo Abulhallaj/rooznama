@@ -99,6 +99,23 @@ public static class Loc
         ["week"] = ("هفته", "Wk"),
         ["occ.approx"] = ("تقریبی", "approximate"),
 
+        ["event.add"] = ("افزودن رویداد", "Add event"),
+        ["event.edit"] = ("ویرایش رویداد", "Edit event"),
+        ["event.title"] = ("عنوان", "Title"),
+        ["event.notes"] = ("توضیحات", "Notes"),
+        ["event.date"] = ("تاریخ", "Date"),
+        ["event.allday"] = ("همه روز", "All day"),
+        ["event.start"] = ("شروع", "Start"),
+        ["event.end"] = ("پایان", "End"),
+        ["event.repeat"] = ("تکرار هر سال", "Repeat every year"),
+        ["event.repeat.in"] = ("بر اساس تقویم", "In the calendar"),
+        ["event.yearly"] = ("هر سال", "Every year"),
+        ["event.save"] = ("ذخیره", "Save"),
+        ["event.delete"] = ("حذف", "Delete"),
+        ["event.cancel"] = ("انصراف", "Cancel"),
+        ["cal.jalali"] = ("شمسی", "Shamsi"),
+        ["cal.hijri"] = ("قمری", "Hijri"),
+        ["cal.gregorian"] = ("میلادی", "Gregorian"),
     };
 
     public static string T(string key) => S.TryGetValue(key, out var v) ? (IsFa ? v.Fa : v.En) : key;
