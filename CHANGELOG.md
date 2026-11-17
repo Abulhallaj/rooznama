@@ -5,6 +5,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## Unreleased
 
+### Added
+- **Fixed occasions per calendar**: `calendar/rules/fixed-jalali.json` (existing), new `fixed-hijri.json` (the 17 official religious holidays; `day: -1` is the last day of the month) and `fixed-gregorian.json` (New Year's Day, 8 March, 21 September, Christmas). Rules fill in wherever the yearly dataset has nothing, for example Nowruz and the religious holidays of 1406 onwards; Hijri dates that did not come from the official data are labelled *approximate*. The yearly dataset always wins and nothing is listed twice. See `calendar/RULES.md`.
+- **Rules vs. dataset comparison** (`CalendarRuleAudit`, run by the tests): for every year the official Hijri data covers, all fixed rules agree with the dataset. The only differences are in 1384, where the dataset places Arbaeen and Eid al-Adha one day before the official qamari date.
+- **Week numbers** in the main calendar, in a column in front of the first (Saturday) column, by the Iranian rule (the week with 1 Farvardin is week 1). Turn it off in Settings.
+- **Arrow-key navigation** in the main calendar: arrow keys move the selected day (←/→ one day, ↑/↓ one week, in the direction of the right-to-left grid; the next or previous month opens by itself), PageUp/PageDown change the month.
+- **Holiday background** in the main calendar: holidays get a light red tile that is readable on the light and the dark theme.
+- Tests for the fixed rules, their link to the dataset, the occasion merge, the audit and the week numbers.
+
+### Changed
+- **The main calendar and the tray flyout are separate controls.** `MainCalendarView` (new) is the main calendar page and carries the new features; `CalendarPanel` is now the flyout only and looks and behaves as before. The sizes, weights and places of the Shamsi, Gregorian and Hijri numbers in the main calendar's cells are plain constants in `Views/MainCalendarMetrics.cs`.
+- Occasions come from `CalendarOccasionService` (yearly dataset + fixed rules), so the flyout also shows the fixed occasions of years without dataset.
+- `calendar/schema.json` describes the rule calendars, `aliases` and `day: -1`.
+
 ## [0.8.0] - 2026-11-11
 ### Added
 - **Hijri (qamari) dates.** Shown in the day hover text and the tray tooltip (Settings: "Show the Hijri date in tooltips") and as a small day in the large calendar's cells, with the month name on the 1st (Settings: "Show the Hijri day in calendar cells"). Hijri numbers use **Arabic digits** (٠١٢٣…), not Persian ones.
