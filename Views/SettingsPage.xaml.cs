@@ -20,6 +20,7 @@ public sealed partial class SettingsPage : Page
         UpdatesSwitch.IsOn = s.CheckUpdates;
         HijriTipSwitch.IsOn = s.ShowHijriInTooltip;
         HijriCellsSwitch.IsOn = s.ShowHijriInCells;
+        WeeksSwitch.IsOn = s.ShowWeekNumbers;
         Select(HijriSourceBox, s.HijriSource);
         Select(ColorBox, s.IconColor);
         Select(LangBox, s.Language);
@@ -67,6 +68,7 @@ public sealed partial class SettingsPage : Page
         s.HijriSource = TagOf(HijriSourceBox, s.HijriSource);
         s.ShowHijriInTooltip = HijriTipSwitch.IsOn;
         s.ShowHijriInCells = HijriCellsSwitch.IsOn;
+        s.ShowWeekNumbers = WeeksSwitch.IsOn;
 
         s.Save();
         s.ApplyStartup();
