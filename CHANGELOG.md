@@ -4,6 +4,8 @@ All notable changes to **Rooznama (روزنما)** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Added (experimental personal event)
+- **Personal events** in the main calendar: add, edit and delete (all-day or timed, with notes and an optional yearly repetition by the Shamsi, Hijri or Gregorian date). They are stored in `personal-events.json` next to `settings.json` (atomic writes; a damaged file is kept as `.bad`; a file from a newer version is never overwritten). The model already carries what Google Calendar needs (remote id, etag, sync state, Gregorian wall-clock times with an exclusive all-day end, an RRULE for Gregorian yearly events, deletion tombstones).
 
 ### Added
 - **Fixed occasions per calendar**: `calendar/rules/fixed-jalali.json` (existing), new `fixed-hijri.json` (the 17 official religious holidays; `day: -1` is the last day of the month) and `fixed-gregorian.json` (New Year's Day, 8 March, 21 September, Christmas). Rules fill in wherever the yearly dataset has nothing, for example Nowruz and the religious holidays of 1406 onwards; Hijri dates that did not come from the official data are labelled *approximate*. The yearly dataset always wins and nothing is listed twice. See `calendar/RULES.md`.
