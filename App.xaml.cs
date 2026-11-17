@@ -27,6 +27,21 @@ public partial class App : Application
         CalendarRuleSet.Load(Path.Combine(AppContext.BaseDirectory, "calendar", "rules"), Log.Write);
     public static CalendarOccasionService Occasions { get; } = new(CalendarData, CalendarRules, HijriService.Provider);
 
+    // Google Calendar: sign-in and the two-way sync of the personal events.
+    // Experimental and off by default: created only when first used, so with the setting off no HttpClient is made and no token file is read.
+    static readonly Lazy<HttpClient> GoogleHttp = new(CreateHttp);
+    static readonly Lazy<GoogleAuth> LazyGoogle = new(() => new GoogleAuth(GoogleHttp.Value, GoogleClientConfig.Get, Path.Combine(AppPaths.DataDir, "google-token.bin")));
+    static readonly Lazy<GoogleSyncScheduler> LazyGoogleSync = new(() => new GoogleSyncScheduler(Google, PersonalEvents, GoogleHttp.Value));
+    public static GoogleAuth Google => LazyGoogle.Value;
+    public static GoogleSyncScheduler GoogleSync => LazyGoogleSync.Value;
+
+    static HttpClient CreateHttp()
+    {
+        var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("Rooznama/" + AppInfo.VersionText);
+        return http;
+    }
+
     public static FlyoutWindow Flyout { get; private set; } = null!;
     public static TrayService Tray { get; private set; } = null!;
 
@@ -51,6 +66,7 @@ public partial class App : Application
 
         if (Settings.StartWithWindows) Settings.ApplyStartup();   // keeps the Run path current if the exe was moved/updated
         UpdateService.Start();
+        if (Settings.Experimental) GoogleSync.Start();   // experimental: nothing Google runs unless it was turned on
     }
 
     /// <summary>The FontFamily string actually applied (shown in About for diagnosis).</summary>
@@ -110,6 +126,7 @@ public partial class App : Application
 
     public static void Quit()
     {
+        if (LazyGoogleSync.IsValueCreated) GoogleSync.Dispose();
         Tray.Dispose();
         _shell?.Close();
         Flyout.AllowClose = true;
