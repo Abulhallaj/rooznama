@@ -5,6 +5,14 @@
     xmlns:svc="using:Rooznama.Services"
     FontFamily="{StaticResource AppFontFamily}">
 
+    <Page.Resources>
+        <!-- the calendar popups show only the days of the month being viewed -->
+        <Style x:Key="NoOutOfScopeDays" TargetType="CalendarView">
+            <Setter Property="OutOfScopeForeground" Value="Transparent"/>
+            <Setter Property="OutOfScopeBackground" Value="Transparent"/>
+        </Style>
+    </Page.Resources>
+
     <StackPanel Padding="24,16" Spacing="16" MaxWidth="520" HorizontalAlignment="Stretch">
         <TextBlock Text="{x:Bind svc:Loc.T('converter')}" Style="{StaticResource SubtitleTextBlockStyle}"/>
 
@@ -14,7 +22,8 @@
             <StackPanel Spacing="10">
                 <TextBlock Text="{x:Bind svc:Loc.T('conv.shamsi')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <CalendarDatePicker x:Name="FaPicker" CalendarIdentifier="PersianCalendar"
-                                    HorizontalAlignment="Stretch" DateChanged="Fa_DateChanged"/>
+                                    HorizontalAlignment="Stretch" DateChanged="Fa_DateChanged"
+                                    CalendarViewStyle="{StaticResource NoOutOfScopeDays}"/>
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -32,7 +41,8 @@
             <StackPanel Spacing="10">
                 <TextBlock Text="{x:Bind svc:Loc.T('conv.gregorian')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <CalendarDatePicker x:Name="GPicker" CalendarIdentifier="GregorianCalendar" Language="en-US"
-                                    HorizontalAlignment="Stretch" DateChanged="G_DateChanged"/>
+                                    HorizontalAlignment="Stretch" DateChanged="G_DateChanged"
+                                    CalendarViewStyle="{StaticResource NoOutOfScopeDays}"/>
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -49,19 +59,9 @@
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
             <StackPanel Spacing="10">
                 <TextBlock Text="{x:Bind svc:Loc.T('conv.hijri')}" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.6*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <NumberBox x:Name="HYear" Header="{x:Bind svc:Loc.T('conv.hijri.year')}" Minimum="1318" Maximum="1500"
-                               SpinButtonPlacementMode="Compact" ValueChanged="Hijri_ValueChanged"/>
-                    <ComboBox x:Name="HMonth" Grid.Column="1" Header="{x:Bind svc:Loc.T('conv.hijri.month')}"
-                              HorizontalAlignment="Stretch" SelectionChanged="Hijri_SelectionChanged"/>
-                    <NumberBox x:Name="HDay" Grid.Column="2" Header="{x:Bind svc:Loc.T('conv.hijri.day')}" Minimum="1" Maximum="30"
-                               SpinButtonPlacementMode="Compact" ValueChanged="Hijri_ValueChanged"/>
-                </Grid>
+                <CalendarDatePicker x:Name="HPicker" CalendarIdentifier="UmAlQuraCalendar"
+                                    HorizontalAlignment="Stretch" DateChanged="H_DateChanged"
+                                    CalendarViewStyle="{StaticResource NoOutOfScopeDays}"/>
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>

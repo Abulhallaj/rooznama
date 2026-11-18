@@ -8,8 +8,12 @@ namespace Rooznama.Views;
 
 public sealed partial class ConverterPage : Page
 {
-    // Both pickers hold the same Gregorian DateTimeOffset; they only differ in how they display it.
+    // The Shamsi and the Gregorian picker hold the same Gregorian DateTimeOffset; they only differ in how they display it.
+    // The Hijri picker counts months and days by Umm al-Qura, so it holds the day whose Umm al-Qura date has the same year, month
+    // and day as the Hijri date of the selected source: it then shows the date the rest of the app shows.
     bool _sync;
+    static readonly UmAlQuraHijriSource UmAlQura = new();
+    static readonly HijriProvider UmAlQuraOnly = new(() => HijriProvider.UmAlQuraId, UtHijriSource.Empty);
 
     public ConverterPage()
     {
@@ -17,10 +21,13 @@ public sealed partial class ConverterPage : Page
         FaPicker.Language = Loc.Lang;
         FaPicker.DateFormat = "{dayofweek.full} {day.integer} {month.full} {year.full}";
         GPicker.DateFormat = "{dayofweek.full} {day.integer} {month.full} {year.full}";
+        HPicker.Language = Loc.IsFa ? "ar-SA" : "en-US";   // Arabic digits in Persian mode
+        HPicker.DateFormat = "{dayofweek.full} {day.integer} {month.full} {year.full}";
 
         var min = new DateTimeOffset(new DateTime(1900, 1, 1));
         var max = new DateTimeOffset(new DateTime(2200, 12, 31));
-        for (int m = 1; m <= 12; m++) HMonth.Items.Add(HijriService.MonthName(m));
+        HPicker.MinDate = new DateTimeOffset(new DateTime(1900, 5, 1));      // what Umm al-Qura can count
+        HPicker.MaxDate = new DateTimeOffset(new DateTime(2077, 11, 16));
         FaPicker.MinDate = GPicker.MinDate = min;
         FaPicker.MaxDate = GPicker.MaxDate = max;
 
@@ -42,16 +49,13 @@ public sealed partial class ConverterPage : Page
         UpdateTexts();
     }
 
-    // the Hijri boxes follow the Gregorian date, and drive it when the person types a Hijri date
-    void Hijri_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs e) => FromHijri();
-    void Hijri_SelectionChanged(object sender, SelectionChangedEventArgs e) => FromHijri();
-
-    void FromHijri()
+    // choosing a Hijri date: read the Umm al-Qura date the picker shows, find the day that has it in the selected source
+    void H_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs e)
     {
-        if (_sync || double.IsNaN(HYear.Value) || double.IsNaN(HDay.Value) || HMonth.SelectedIndex < 0) return;
+        if (_sync || e.NewDate is not { } picked) return;
 
-        var h = new HijriDate((int)HYear.Value, HMonth.SelectedIndex + 1, (int)HDay.Value);
-        if (HijriLookup.FindGregorian(h, HijriService.Provider) is not { } day
+        if (UmAlQura.TryGet(picked.Date) is not { } shown
+            || HijriLookup.FindGregorian(shown, HijriService.Provider) is not { } day
             || day < GPicker.MinDate.Date || day > GPicker.MaxDate.Date)
         {
             HNum.Text = Loc.T("conv.hijri.invalid");
@@ -66,10 +70,21 @@ public sealed partial class ConverterPage : Page
             FaPicker.Date = date;
         }
         finally { _sync = false; }
-        UpdateTexts(updateHijriBoxes: false);
+        UpdateTexts(updateHijriPicker: false);
     }
 
-    void UpdateTexts(bool updateHijriBoxes = true)
+    // the Hijri picker follows the Gregorian date; when Umm al-Qura has no day with that date (an official 30th day in a month
+    // it counts as 29 days) the picker shows the day itself and the line under it gives the exact date
+    void ShowInHijriPicker(HijriDate hijri, DateTime day)
+    {
+        var shown = HijriLookup.FindGregorian(hijri, UmAlQuraOnly) ?? day;
+        if (shown < HPicker.MinDate.Date || shown > HPicker.MaxDate.Date) return;
+        _sync = true;
+        try { HPicker.Date = new DateTimeOffset(shown); }
+        finally { _sync = false; }
+    }
+
+    void UpdateTexts(bool updateHijriPicker = true)
     {
         if (GPicker.Date is { } d)
         {
@@ -79,12 +94,7 @@ public sealed partial class ConverterPage : Page
             if (HijriService.Get(day) is { } h)
             {
                 HNum.Text = HijriService.Digits($"{h.Year:0000}/{h.Month:00}/{h.Day:00}");   // Arabic digits
-                if (updateHijriBoxes)
-                {
-                    _sync = true;
-                    try { HYear.Value = h.Year; HMonth.SelectedIndex = h.Month - 1; HDay.Value = h.Day; }
-                    finally { _sync = false; }
-                }
+                if (updateHijriPicker) ShowInHijriPicker(h, day);
             }
             else HNum.Text = Loc.T("conv.hijri.none");
         }
