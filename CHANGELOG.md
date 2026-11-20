@@ -5,6 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## Unreleased
 
+## [0.9.0] - 2026-11-21
 ### Added
 - **Fixed occasions per calendar**: `calendar/rules/fixed-jalali.json` (existing), new `fixed-hijri.json` (the 17 official religious holidays; `day: -1` is the last day of the month) and `fixed-gregorian.json` (New Year's Day, 8 March, 21 September, Christmas). Rules fill in wherever the yearly dataset has nothing, for example Nowruz and the religious holidays of 1406 onwards; Hijri dates that did not come from the official data are labelled *approximate*. The yearly dataset always wins and nothing is listed twice. See `calendar/RULES.md`.
 - **Rules vs. dataset comparison** (`CalendarRuleAudit`, run by the tests): for every year the official Hijri data covers, all fixed rules agree with the dataset. The only differences are in 1384, where the dataset places Arbaeen and Eid al-Adha one day before the official qamari date.
@@ -17,6 +18,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 - **The main calendar and the tray flyout are separate controls.** `MainCalendarView` (new) is the main calendar page and carries the new features; `CalendarPanel` is now the flyout only and looks and behaves as before. The sizes, weights and places of the Shamsi, Gregorian and Hijri numbers in the main calendar's cells are plain constants in `Views/MainCalendarMetrics.cs`.
 - Occasions come from `CalendarOccasionService` (yearly dataset + fixed rules), so the flyout also shows the fixed occasions of years without dataset.
 - `calendar/schema.json` describes the rule calendars, `aliases` and `day: -1`.
+
+## [0.8.2] - 2026-11-20
+Version 0.8.1 was not released; its changes are included in 0.8.2.
+
+### Changed
+- **Converter:** the Hijri date is now chosen with a date picker, like the Shamsi and Gregorian ones (it replaces the year, month and day boxes). The picker counts days by Umm al-Qura but is set so that it shows the date of the selected Hijri source, which keeps it in agreement with the rest of the app; the line under it always gives the exact date. An official 30th day in a month that Umm al-Qura counts as 29 days is shown only in that line.
 
 ## [0.8.0] - 2026-11-11
 ### Added
