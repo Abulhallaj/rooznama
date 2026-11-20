@@ -5,10 +5,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## Unreleased
 
-## [0.8.1] - 2026-11-XX
+## [0.8.2] - 2026-11-20
+Version 0.8.1 was not released; its changes are included in 0.8.2.
+
 ### Changed
 - **Converter:** the Hijri date is now chosen with a date picker, like the Shamsi and Gregorian ones (it replaces the year, month and day boxes). The picker counts days by Umm al-Qura but is set so that it shows the date of the selected Hijri source, which keeps it in agreement with the rest of the app; the line under it always gives the exact date. An official 30th day in a month that Umm al-Qura counts as 29 days is shown only in that line.
-- **Converter:** the date pickers no longer show the days of the previous and next month.
 
 ## [0.8.0] - 2026-11-11
 ### Added
