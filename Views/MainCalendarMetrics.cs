@@ -22,27 +22,27 @@ internal static class MainCalendarMetrics
     public const double Edge = 6;
 
     // ---- Shamsi day (the big one) ----
-    public const double ShamsiSize = 18;
+    public const double ShamsiSize = 36;
     public static readonly Windows.UI.Text.FontWeight ShamsiWeight = FontWeights.SemiBold;
-    public const CellSlot ShamsiSlot = CellSlot.Center;
+    public const CellSlot ShamsiSlot = CellSlot.CenterEnd;
     /// <summary>Pixels the Shamsi number is moved up from the middle (only for the Center slots).</summary>
     public const double ShamsiLift = 6;
 
     // ---- Gregorian day ----
     public const double GregorianSize = 11;
     public const double GregorianOpacity = 0.65;
-    public const CellSlot GregorianSlot = CellSlot.BottomStart;
+    public const CellSlot GregorianSlot = CellSlot.TopStart;
 
     // ---- Hijri day ----
     public const double HijriSize = 11;
     public const double HijriOpacity = 0.65;
-    public const CellSlot HijriSlot = CellSlot.BottomEnd;
+    public const CellSlot HijriSlot = CellSlot.BottomStart;
 
     // ---- holidays ----
     /// <summary>Background of a holiday tile: a light red that is readable on the light and the dark theme.</summary>
     public static readonly Color HolidayBackground = Color.FromArgb(0x2E, 0xE5, 0x39, 0x35);
     /// <summary>Give Fridays the holiday background too (they already have red text).</summary>
-    public const bool FridayBackground = false;
+    public const bool FridayBackground = true;
 
     /// <summary>Puts a number in its slot: alignment plus the edge margin.</summary>
     public static void Place(FrameworkElement e, CellSlot slot, double lift = 0)
