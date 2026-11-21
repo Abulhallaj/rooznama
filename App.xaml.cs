@@ -20,6 +20,11 @@ public partial class App : Application
     public static CalendarEventService CalendarData { get; } =
         new(Path.Combine(AppContext.BaseDirectory, "calendar"), Log.Write);
 
+    // Fixed rules per calendar (calendar\rules) merged with the yearly dataset; Hijri dates follow the selected source.
+    public static CalendarRuleSet CalendarRules { get; } =
+        CalendarRuleSet.Load(Path.Combine(AppContext.BaseDirectory, "calendar", "rules"), Log.Write);
+    public static CalendarOccasionService Occasions { get; } = new(CalendarData, CalendarRules, HijriService.Provider);
+
     public static FlyoutWindow Flyout { get; private set; } = null!;
     public static TrayService Tray { get; private set; } = null!;
 

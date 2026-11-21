@@ -6,6 +6,6 @@
     FontFamily="{StaticResource AppFontFamily}">
 
     <Grid Padding="24,12,24,16">
-        <views:CalendarPanel x:Name="BigCal" MaxWidth="780" HorizontalAlignment="Stretch"/>
+        <views:MainCalendarView x:Name="BigCal" MaxWidth="780" HorizontalAlignment="Stretch"/>
     </Grid>
 </Page>

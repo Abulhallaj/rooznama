@@ -92,6 +92,10 @@ public static class Loc
                            "Days the selected source does not cover (for example years after the latest official calendar) automatically use Umm al-Qura, which can differ from Iran's official calendar by a day."),
         ["set.hijri.tip"] = ("نمایش تاریخ قمری در Tooltip", "Show the Hijri date in tooltips"),
         ["set.hijri.cells"] = ("نمایش روز قمری در خانه‌های تقویم", "Show the Hijri day in calendar cells"),
+        ["set.weeks"] = ("نمایش شماره هفته در تقویم", "Show the week number in the calendar"),
+        ["week"] = ("هفته", "Wk"),
+        ["occ.approx"] = ("تقریبی", "approximate"),
+
     };
 
     public static string T(string key) => S.TryGetValue(key, out var v) ? (IsFa ? v.Fa : v.En) : key;

@@ -26,6 +26,10 @@ public static class DayInfo
 
     /// <summary>Official holidays and the other observances of a day, kept as two separate lists.</summary>
     public static (IReadOnlyList<OccasionRow> Holidays, IReadOnlyList<OccasionRow> Observances) Split(IReadOnlyList<CalendarItem> items) =>
-        (items.Where(i => i.IsHoliday).Select(i => new OccasionRow(Title(i), Loc.T("occ.holiday"))).ToList(),
-         items.Where(i => !i.IsHoliday).Select(i => new OccasionRow(Title(i), Loc.T("occ.observance"))).ToList());
+        (items.Where(i => i.IsHoliday).Select(i => new OccasionRow(Title(i), Caption(i, "occ.holiday"))).ToList(),
+         items.Where(i => !i.IsHoliday).Select(i => new OccasionRow(Title(i), Caption(i, "occ.observance"))).ToList());
+
+    // a Hijri date that did not come from the official Iranian data may be off by a day
+    static string Caption(CalendarItem i, string key) =>
+        i.Categories.Contains("approximate") ? $"{Loc.T(key)} · {Loc.T("occ.approx")}" : Loc.T(key);
 }

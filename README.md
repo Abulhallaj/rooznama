@@ -36,6 +36,7 @@
 - فارسی (پیش‌فرض) و انگلیسی، فونت وزیرمتن، تم خودکار / روشن / تیره
 - تعطیلات رسمی و مناسبت‌ها (۱۳۸۳ تا ۱۴۰۵، آفلاین؛ داده‌ها بر پایه‌ی سایت رسمی مرکز تقویم دانشگاه تهران. ساختار رویدادها از [تقویم FarsiUI](https://farsiui.ir/calendar)) وام گرفته شده است.
 - تاریخ قمری (با ارقام عربی) از تقویم رسمی مرکز تقویم دانشگاه تهران یا ام‌القری (قابل انتخاب در تنظیمات)؛ تبدیل تاریخ شمسی، میلادی و قمری در صفحه تبدیل
+- مناسبت‌های ثابت هر تقویم (شمسی، قمری، میلادی) برای سال‌های بعد از ۱۴۰۵؛ شماره هفته و حرکت با کلیدهای جهت‌دار و زمینه قرمز تعطیلی در تقویم اصلی (تقویم کوچک نوار وظیفه بدون تغییر)
 - اجرا با ویندوز (اختیاری)
 
 ### دانلود
@@ -94,6 +95,7 @@ Rooznama shows the Shamsi (Jalali) day number on a system-tray icon. Hover for t
 - Persian (default) and English, Vazirmatn font, automatic / light / dark theme
 - Official holidays and observances for 1383–1405, offline (data based on the [FarsiUI calendar](https://farsiui.ir/calendar))
 - Hijri dates (Arabic digits) from the official Tehran University calendars or Umm al-Qura, selectable in Settings; Shamsi, Gregorian and Hijri conversion
+- Fixed occasions per calendar (Shamsi, Hijri, Gregorian) fill in for years after 1405; week numbers, arrow-key navigation and a light red holiday background in the main calendar (the tray flyout is unchanged)
 - Optional start with Windows
 
 ### Download
@@ -143,8 +145,8 @@ Views/                   CalendarPanel, CalendarPage, ConverterPage, SettingsPag
 Services/                TrayService (Shell_NotifyIcon), PersianDate, Loc (fa/en), AppSettings,
                          UpdateService, AppInfo, AppPaths, DayInfo, CalendarEvents (provider hook),
                          CalendarEventService + CalendarEventModels (holidays/observances),
-                         HijriService + HijriSources, Log
-calendar/                bundled holidays, observances and Hijri data (JSON, copied next to the exe)
+                         HijriService + HijriSources, CalendarRules + CalendarOccasions (fixed rules, merge, audit), WeekNumbers, Log
+calendar/                bundled holidays, observances, fixed rules and Hijri data (JSON, copied next to the exe); see calendar/RULES.md
 tests/                   xunit tests for the calendar data service
 TipWindow                right-to-left tray tooltip
 installer/               Inno Setup script (used by CI)
