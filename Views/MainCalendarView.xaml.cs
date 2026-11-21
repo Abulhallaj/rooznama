@@ -17,8 +17,8 @@ public sealed partial class MainCalendarView : UserControl
     enum Mode { Days, Months, Years }
 
     const int MaxYear = 9377;
-    static readonly string[] FaHeads = { "ش", "ی", "د", "س", "چ", "پ", "ج" };            // شنبه → جمعه
-    static readonly string[] EnHeads = { "Sa", "Su", "Mo", "Tu", "We", "Th", "Fr" };
+    static readonly string[] FaHeads = { "شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه" };            // شنبه → جمعه
+    static readonly string[] EnHeads = { "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
 
     Mode _mode = Mode.Days;
     int _y, _m;
