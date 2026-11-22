@@ -4,6 +4,7 @@ using System.Drawing.Text;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using Microsoft.UI.Dispatching;
+using Rooznama.Help;
 using WinRT.Interop;
 
 namespace Rooznama.Services;
@@ -283,6 +284,7 @@ public sealed class TrayService : IDisposable
         AppendMenu(menu, MF_STRING, (UIntPtr)1, Loc.T("calendar"));
         AppendMenu(menu, MF_STRING, (UIntPtr)2, Loc.T("converter"));
         AppendMenu(menu, MF_STRING, (UIntPtr)3, Loc.T("settings"));
+        AppendMenu(menu, MF_STRING, (UIntPtr)5, HelpCatalog.PageTitle(Loc.IsFa));
         AppendMenu(menu, MF_STRING, (UIntPtr)4, Loc.T("about"));
         AppendMenu(menu, MF_SEPARATOR, UIntPtr.Zero, null);
         AppendMenu(menu, MF_STRING, (UIntPtr)9, Loc.T("exit"));
@@ -301,6 +303,7 @@ public sealed class TrayService : IDisposable
             case 2: App.ShowShell("converter"); break;
             case 3: App.ShowShell("settings"); break;
             case 4: App.ShowShell("about"); break;
+            case 5: App.ShowShell("help"); break;
             case 9: App.Quit(); break;
         }
     }
