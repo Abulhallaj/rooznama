@@ -2,7 +2,9 @@ using System.Runtime.InteropServices;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Rooznama.Help;
 using Rooznama.Services;
 using Rooznama.Views;
 using Windows.Graphics;
@@ -29,6 +31,7 @@ public sealed partial class ShellWindow : Window
         NavCalendar.Content = Loc.T("calendar");
         NavConverter.Content = Loc.T("converter");
         NavSettings.Content = Loc.T("settings");
+        NavHelp.Content = HelpCatalog.PageTitle(Loc.IsFa);
         NavAbout.Content = Loc.T("about");
         NavSupport.Content = Loc.T("support");
 
@@ -43,6 +46,13 @@ public sealed partial class ShellWindow : Window
         int w = (int)(680 * s);
         int h = Math.Min((int)(720 * s), wa.Height);
         AppWindow.MoveAndResize(new RectInt32(wa.X + (wa.Width - w) / 2, wa.Y + (wa.Height - h) / 2, w, h));
+    }
+
+    // F1 opens the help
+    void Help_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        ShowPage("help");
+        args.Handled = true;
     }
 
     public void ShowPage(string tag)
@@ -60,6 +70,7 @@ public sealed partial class ShellWindow : Window
         {
             "converter" => typeof(ConverterPage),
             "settings" => typeof(SettingsPage),
+            "help" => typeof(HelpPage),
             "about" => typeof(AboutPage),
             "support" => typeof(SupportPage),
             _ => typeof(CalendarPage)

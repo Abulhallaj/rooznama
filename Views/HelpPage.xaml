@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Rooznama.Views.HelpPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    FontFamily="{StaticResource AppFontFamily}">
+
+    <Page.Resources>
+        <!-- a highlighted note inside a topic -->
+        <Style x:Key="NoteBox" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}"/>
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid MaxWidth="640" Padding="24,20" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="10">
+                <TextBlock x:Name="TitleText" Style="{StaticResource TitleTextBlockStyle}"/>
+                <AutoSuggestBox x:Name="SearchBox" QueryIcon="Find" TextChanged="Search_TextChanged"/>
+                <TextBlock x:Name="NoResults" Opacity="0.7" Visibility="Collapsed"/>
+                <StackPanel x:Name="Topics" Spacing="8"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

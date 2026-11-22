@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Grid x:Name="Root">
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="F1" Invoked="Help_Invoked"/>
+        </Grid.KeyboardAccelerators>
         <!-- LeftCompact: the pane sits on the right in RTL (like the reference screenshot) -->
         <NavigationView x:Name="Nav"
                         PaneDisplayMode="LeftCompact"
@@ -22,7 +25,12 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Name="NavSettings" Icon="Setting" Tag="settings"/>
-                <NavigationViewItem x:Name="NavAbout" Icon="Help" Tag="about"/>
+                <NavigationViewItem x:Name="NavHelp" Icon="Help" Tag="help"/>
+                <NavigationViewItem x:Name="NavAbout" Tag="about">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.FooterMenuItems>
             <Frame x:Name="ContentFrame"/>
         </NavigationView>
