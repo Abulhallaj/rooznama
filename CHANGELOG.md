@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 
 ## Unreleased
 
+## [0.10.0] - 2026-11-23
+### Added
+- **In-app help**: a Help page with expandable topics and a search box (Persian and English), opened from the navigation, the tray menu or the **F1** key. Topics: getting started, the small calendar, the main calendar, keys, holidays and occasions, Hijri date, the date converter, settings and troubleshooting. Each topic is one small class in `Help/Sections`.
+- Tests for the help markup, the topics and the search.
+
+### Changed
+- The About item uses an info icon, since the question mark now belongs to Help.
+
 ## [0.9.0] - 2026-11-21
 ### Added
 - **Fixed occasions per calendar**: `calendar/rules/fixed-jalali.json` (existing), new `fixed-hijri.json` (the 17 official religious holidays; `day: -1` is the last day of the month) and `fixed-gregorian.json` (New Year's Day, 8 March, 21 September, Christmas). Rules fill in wherever the yearly dataset has nothing, for example Nowruz and the religious holidays of 1406 onwards; Hijri dates that did not come from the official data are labelled *approximate*. The yearly dataset always wins and nothing is listed twice. See `calendar/RULES.md`.
