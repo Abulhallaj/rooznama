@@ -58,6 +58,7 @@ public sealed class HelpTests
         Assert.Equal(all.Select(s => s.Order).OrderBy(o => o), all.Select(s => s.Order));
         Assert.Equal(all.Count, all.Select(s => s.Id).Distinct().Count());
         Assert.Contains(all, s => s.Id == "hijri");
+        Assert.Contains(all, s => s.Id == "keys");
     }
 
     [Fact]
@@ -112,6 +113,9 @@ public sealed class HelpTests
         Assert.Contains(HelpCatalog.Search("Hijri", false), s => s.Id == "hijri");
         Assert.Contains(HelpCatalog.Search("clipboard", false), s => s.Id == "converter");
         Assert.Contains(HelpCatalog.Search("%AppData%", false), s => s.Id == "troubleshooting");
+        Assert.Contains(HelpCatalog.Search("PageDown", false), s => s.Id == "keys");
+        Assert.Contains(HelpCatalog.Search("شماره هفته", true), s => s.Id == "main-calendar");
+        Assert.Contains(HelpCatalog.Search("week number", false), s => s.Id == "main-calendar");
     }
 
     [Fact]
