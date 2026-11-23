@@ -27,6 +27,7 @@ public sealed class SettingsHelp : HelpSection
         - **منبع تاریخ قمری:** مرکز تقویم دانشگاه تهران (رسمی ایران) یا ام‌القری.
         - **نمایش تاریخ قمری در Tooltip**
         - **نمایش روز قمری در خانه‌های تقویم**
+        - **نمایش شماره هفته در تقویم:** ستون شماره‌ی هفته در تقویم اصلی (از نسخه ۰.۹.۰).
 
         ## به‌روزرسانی
         - **بررسی خودکار نسخه جدید:** برنامه آخرین نسخه را از GitHub می‌خواند. اطلاعات شخصی یا آمار استفاده ارسال نمی‌شود.
@@ -52,6 +53,7 @@ public sealed class SettingsHelp : HelpSection
         - **Hijri date source:** Tehran University Calendar Center (official Iran) or Umm al-Qura.
         - **Show the Hijri date in tooltips**
         - **Show the Hijri day in calendar cells**
+        - **Show the week number in the calendar:** the week-number column in the main calendar (since version 0.9.0).
 
         ## Updates
         - **Check for updates automatically:** the app reads the latest release from GitHub. No personal data or usage statistics are sent.

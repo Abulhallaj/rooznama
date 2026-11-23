@@ -21,6 +21,8 @@ public sealed class FlyoutHelp : HelpSection
 
         ## بستن
         کلید **Esc** یا کلیک بیرون از تقویم آن را می‌بندد. اگر نمی‌خواهید با کلیک بیرون بسته شود، در تنظیمات گزینه‌ی «بستن تقویم با کلیک بیرون از آن» را خاموش کنید.
+
+        > این تقویم عمداً ساده مانده است. شماره‌ی هفته، روز قمری در خانه‌ها و زمینه‌ی قرمز تعطیلات فقط در تقویم اصلی (پنجره‌ی اصلی) هستند.
         """,
         """
         A left click on the icon opens a monthly calendar next to it. At the top it shows today's date (Shamsi and Gregorian) and an arrow button that collapses or expands the calendar; the app remembers which state you left it in.
@@ -36,5 +38,7 @@ public sealed class FlyoutHelp : HelpSection
 
         ## Closing
         The **Esc** key or a click outside the calendar closes it. If you do not want it to close when you click outside, turn off "Close the calendar when it loses focus" in Settings.
+
+        > This calendar is kept simple on purpose. The week numbers, the Hijri day in the cells and the red background of holidays are only in the main calendar (the main window).
         """);
 }
