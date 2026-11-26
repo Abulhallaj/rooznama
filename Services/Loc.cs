@@ -81,6 +81,9 @@ public static class Loc
         ["upd.uptodate"] = ("نسخه شما به‌روز است.", "You're up to date."),
         ["upd.available"] = ("نسخه جدید {0} موجود است", "Version {0} is available"),
         ["upd.download"] = ("دانلود", "Download"),
+        ["upd.install"] = ("دانلود و نصب", "Download and install"),
+        ["upd.installing"] = ("در حال دانلود… {0}٪ (برنامه بعد از دانلود دوباره باز می‌شود)", "Downloading… {0}% (the app restarts when it is done)"),
+        ["upd.installfailed"] = ("نصب انجام نشد؛ دوباره تلاش کنید یا از صفحه Releases دانلود کنید.", "Couldn't install the update; try again or download it from the Releases page."),
         ["upd.failed"] = ("بررسی انجام نشد (اتصال اینترنت؟)", "Couldn't check (no internet?)"),
         ["upd.dev"] = ("نسخه توسعه است؛ بررسی به‌روزرسانی غیرفعال است.", "Development build; update check is disabled."),
 

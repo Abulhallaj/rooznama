@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x64, x86]   # each job produces: portable ZIP + installer (self-contained, no prerequisites)
+        arch: [x64, x86]   # each job produces: portable ZIP + installer + update packages (self-contained, no prerequisites)
 
     steps:
       - uses: actions/checkout@v4
@@ -63,27 +63,54 @@ jobs:
             -o "publish/${{ matrix.arch }}"
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 
-      - name: Portable ZIP (contains a Rooznama folder)
+      # Velopack: one pack per architecture gives the installer, the portable layout and the update packages (full + delta).
+      # Every architecture has its own channel (win-x64 / win-x86), so each one updates only from its own feed.
+      - name: Pack (Velopack, win-${{ matrix.arch }})
         shell: pwsh
         run: |
+          dotnet tool install -g vpk
+          $repo = "${{ github.server_url }}/${{ github.repository }}"
+          $ch = "win-${{ matrix.arch }}"
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            # the previous release is needed to build the delta package; the first Velopack release has none
+            vpk download github --repoUrl $repo --channel $ch --pre --token "${{ secrets.GITHUB_TOKEN }}"
+            if ($LASTEXITCODE -ne 0) { Write-Host "No previous release to build a delta from"; $global:LASTEXITCODE = 0 }
+          }
+          vpk pack --packId Rooznama --packTitle Rooznama --packVersion $env:VERSION `
+            --packDir "publish/${{ matrix.arch }}" --mainExe Rooznama.exe `
+            --runtime $ch --channel $ch --icon Assets/Rooznama.ico --outputDir Releases
+          if ($LASTEXITCODE -ne 0) { throw "vpk pack failed" }
+
+      # dist = only what belongs to THIS release (the previous full package vpk downloaded stays out) + readable file names
+      - name: Collect files (installer, portable ZIP, update packages)
+        shell: pwsh
+        run: |
+          $arch = "${{ matrix.arch }}"
           New-Item -ItemType Directory -Force dist | Out-Null
-          $stage = "stage-${{ matrix.arch }}"
-          New-Item -ItemType Directory -Force "$stage/Rooznama" | Out-Null
-          Copy-Item "publish/${{ matrix.arch }}/*" "$stage/Rooznama" -Recurse
-          New-Item "$stage/Rooznama/portable.flag" -ItemType File | Out-Null   # settings and log stay next to the exe (.\data)
-          Compress-Archive -Path "$stage/Rooznama" -DestinationPath "dist/Rooznama-$env:VERSION-portable-${{ matrix.arch }}.zip"
+          Get-ChildItem Releases -File |
+            Where-Object { $_.Extension -ne '.nupkg' -or $_.Name -like "*-$env:VERSION-*" } |
+            Copy-Item -Destination dist
 
-      - name: Installer (Inno Setup)
-        shell: pwsh
-        run: |
-          choco install innosetup -y --no-progress
-          $iscc = Get-ChildItem "${env:ProgramFiles(x86)}", "$env:ProgramFiles" -Filter ISCC.exe -Recurse -Depth 2 -ErrorAction SilentlyContinue |
-                  Select-Object -First 1 -ExpandProperty FullName
-          if (-not $iscc) { throw "ISCC.exe not found" }
-          & $iscc "/DAppVersion=$env:VERSION" "/DArch=${{ matrix.arch }}" "/DSourceDir=$PWD\publish\${{ matrix.arch }}" "/O$PWD\dist" installer\Rooznama.iss
-          if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
+          $setup = Get-ChildItem dist -Filter '*-Setup.exe' | Select-Object -First 1
+          if (-not $setup) { throw "Setup.exe not found" }
+          Rename-Item $setup.FullName "Rooznama-$env:VERSION-setup-$arch.exe"
 
-      # four separate artifacts (GitHub always downloads an artifact as a .zip; the Release page has the raw files)
+          # portable: the ZIP holds one Rooznama folder; portable.flag goes next to Update.exe (the folder that contains "current"),
+          # because "current" is replaced on every update
+          $zip = Get-ChildItem dist -Filter '*-Portable.zip' | Select-Object -First 1
+          if (-not $zip) { throw "Portable.zip not found" }
+          $tmp = Join-Path $env:RUNNER_TEMP "portable-$arch"
+          Expand-Archive $zip.FullName $tmp -Force
+          $cur = Get-ChildItem $tmp -Recurse -Directory -Filter current | Select-Object -First 1
+          if (-not $cur) { throw "no 'current' folder in the portable ZIP" }
+          $stage = Join-Path $env:RUNNER_TEMP "stage-$arch"
+          New-Item -ItemType Directory -Force $stage | Out-Null
+          Copy-Item $cur.Parent.FullName (Join-Path $stage 'Rooznama') -Recurse
+          New-Item (Join-Path $stage 'Rooznama/portable.flag') -ItemType File | Out-Null
+          Remove-Item $zip.FullName
+          Compress-Archive -Path (Join-Path $stage 'Rooznama') -DestinationPath "dist/Rooznama-$env:VERSION-portable-$arch.zip"
+
+      # separate artifacts (GitHub always downloads an artifact as a .zip; the Release page has the raw files)
       - uses: actions/upload-artifact@v4
         with:
           name: Rooznama-portable-${{ matrix.arch }}
@@ -93,6 +120,16 @@ jobs:
         with:
           name: Rooznama-setup-${{ matrix.arch }}
           path: dist/*-setup-${{ matrix.arch }}.exe
+
+      # what the in-app updater reads: the feed (releases.<channel>.json) and this version's full / delta packages
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Rooznama-update-${{ matrix.arch }}
+          path: |
+            dist/*.nupkg
+            dist/releases.*.json
+            dist/assets.*.json
+            dist/RELEASES*
 
   release:
     needs: build
@@ -108,4 +145,5 @@ jobs:
         with:
           files: dist/*
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}   # v0.11.0-beta.1 -> pre-release (only beta versions follow those)
           

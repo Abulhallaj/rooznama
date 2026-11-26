@@ -15,7 +15,7 @@ public sealed class TroubleshootingHelp : HelpSection
         - **ستون شماره‌ی هفته را نمی‌بینم:** فقط در تقویم اصلی است و با «نمایش شماره هفته در تقویم» در تنظیمات (بخش «تقویم») روشن می‌شود.
         - **فلش‌های صفحه‌کلید در تقویم اصلی کار نمی‌کنند:** یک بار روی تقویم کلیک کنید تا صفحه‌کلید به آن برسد.
         - **تنظیمات و گزارش کجا ذخیره می‌شود؟** در پوشه‌ی `%AppData%\Rooznama`. اگر فایل `portable.flag` کنار برنامه باشد (حالت پرتابل)، در پوشه‌ی `data` کنار برنامه. فایل `rooznama.log` همان‌جاست.
-        - **نسخه جدید آمده ولی اطلاع نمی‌دهد:** در تنظیمات، بخش «به‌روزرسانی»، «بررسی اکنون» را بزنید. نسخه‌های پیش‌انتشار (Pre-release) از طریق بررسی خودکار اعلام نمی‌شوند.
+        - **نسخه جدید آمده ولی اطلاع نمی‌دهد:** در تنظیمات، بخش «به‌روزرسانی»، «بررسی اکنون» را بزنید. نسخه‌ی پایدار نسخه‌های پیش‌انتشار (Pre-release) را اعلام نمی‌کند؛ نسخه‌ی بتا آن‌ها را هم می‌بیند.
         - **مشکل یا پیشنهادی دارم:** در صفحه‌ی «درباره» گزینه‌ی «گزارش مشکل یا پیشنهاد» را بزنید.
         """,
         """
@@ -26,7 +26,7 @@ public sealed class TroubleshootingHelp : HelpSection
         - **I do not see the week-number column:** it exists only in the main calendar and is turned on with "Show the week number in the calendar" in Settings (section "Calendar").
         - **The arrow keys do nothing in the main calendar:** click the calendar once so that the keyboard reaches it.
         - **Where are the settings and the log stored?** In the folder `%AppData%\Rooznama`. If a file `portable.flag` sits next to the app (portable mode), in the folder `data` next to the app. The file `rooznama.log` is there too.
-        - **A new version came out but I was not told:** in Settings, section "Updates", press "Check now". Pre-releases are not announced by the automatic check.
+        - **A new version came out but I was not told:** in Settings, section "Updates", press "Check now". A stable version does not announce pre-releases; a beta version sees them too.
         - **I have a problem or a suggestion:** on the About page use "Report an issue / suggest".
         """);
 }

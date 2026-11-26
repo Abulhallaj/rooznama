@@ -31,7 +31,7 @@ public sealed class SettingsHelp : HelpSection
 
         ## به‌روزرسانی
         - **بررسی خودکار نسخه جدید:** برنامه آخرین نسخه را از GitHub می‌خواند. اطلاعات شخصی یا آمار استفاده ارسال نمی‌شود.
-        - **بررسی اکنون:** همین الان بررسی می‌کند و اگر نسخه جدیدی باشد پیوند دانلود را نشان می‌دهد.
+        - **بررسی اکنون:** همین الان بررسی می‌کند. اگر نسخه جدیدی باشد، دکمه‌ی «دانلود و نصب» فقط فایل‌های تغییرکرده را دانلود می‌کند و برنامه را دوباره باز می‌کند.
         """,
         """
         Every change in Settings is saved at once.
@@ -57,6 +57,6 @@ public sealed class SettingsHelp : HelpSection
 
         ## Updates
         - **Check for updates automatically:** the app reads the latest release from GitHub. No personal data or usage statistics are sent.
-        - **Check now:** checks right now and shows a download link if there is a newer version.
+        - **Check now:** checks right now. If there is a newer version, "Download and install" downloads only the changed files and restarts the app.
         """);
 }

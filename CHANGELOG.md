@@ -4,6 +4,18 @@ All notable changes to **Rooznama (روزنما)** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
+### Added
+- **In-place updates with Velopack.** Settings > Updates: **Download and install** downloads only the changed files (delta packages) from the GitHub release and restarts the app. The automatic check and its switch work as before; the notification still opens the release page.
+- A beta version (for example `0.11.0-beta.1`) also follows pre-releases. A stable version follows stable releases only.
+
+### Changed
+- **Installer and portable ZIP are built by Velopack** (`vpk pack`, one channel per architecture: `win-x64`, `win-x86`) instead of Inno Setup. The file names of the four downloads stay the same. Uninstalling removes the "Start with Windows" entry.
+- **Portable mode:** `portable.flag` and the `data` folder now sit in the extracted `Rooznama` folder next to `Update.exe`, one level above the exe, because the `current` folder is replaced on every update. A flag next to the exe (plain publish folder) still works.
+- The release workflow marks tags with a suffix (`v0.11.0-beta.1`) as pre-releases.
+
+### Notes
+- This is the first Velopack release: versions installed with the old Inno Setup installer or extracted from an old portable ZIP do not update in place. Install the new version once by hand (uninstall the old one first); from then on updates are automatic. For portable, copy the old `data` folder into the new `Rooznama` folder.
+- The `installer` folder (Inno Setup script) is no longer used and can be deleted.
 
 ## [0.10.0] - 2026-11-23
 ### Added

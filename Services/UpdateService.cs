@@ -1,26 +1,27 @@
-using System.Text.Json;
 using Microsoft.UI.Dispatching;
+using Velopack;
+using Velopack.Sources;
 
 namespace Rooznama.Services;
 
 public sealed record UpdateInfo(Version Version, string Tag, string Url);
 public sealed record CheckResult(bool Ok, UpdateInfo? Update);
 
-/// <summary>Checks the latest GitHub release (public API, no personal data) and notifies once per new version.</summary>
+/// <summary>
+/// Checks the GitHub releases through Velopack (no personal data) and notifies once per new version.
+/// Installing downloads only the changed files (delta packages) and restarts the app.
+/// </summary>
 public static class UpdateService
 {
-    static readonly HttpClient Http = CreateClient();
     static DispatcherQueueTimer? _first, _periodic;
+    static UpdateManager? _manager;
+    static Velopack.UpdateInfo? _pending;
 
     public static UpdateInfo? Available { get; private set; }
 
-    static HttpClient CreateClient()
-    {
-        var c = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-        c.DefaultRequestHeaders.UserAgent.ParseAdd($"Rooznama/{AppInfo.VersionText}");
-        c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
-        return c;
-    }
+    // A beta (0.11.0-beta.1) also follows pre-releases; a stable version follows stable releases only.
+    static UpdateManager Manager => _manager ??=
+        new UpdateManager(new GithubSource(AppInfo.RepoUrl, null, AppInfo.VersionText.Contains('-')));
 
     /// <summary>First check ~30 s after start, then every 6 h (the once-per-day rule is enforced in AutoCheckAsync).</summary>
     public static void Start()
@@ -58,35 +59,50 @@ public static class UpdateService
     {
         try
         {
-            using var resp = await Http.GetAsync(
-                $"https://api.github.com/repos/{AppInfo.RepoOwner}/{AppInfo.RepoName}/releases/latest");
-
-            if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)   // no release published yet
+            // not installed by Velopack (plain publish folder, built from source): nothing to update in place
+            if (!Manager.IsInstalled)
             {
-                MarkChecked();
                 Available = null;
                 return new CheckResult(true, null);
             }
-            resp.EnsureSuccessStatusCode();
 
-            using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
-            var root = doc.RootElement;
-            var tag = root.GetProperty("tag_name").GetString() ?? "";
-            var url = root.TryGetProperty("html_url", out var u) ? u.GetString() ?? AppInfo.ReleasesUrl : AppInfo.ReleasesUrl;
-
+            var info = await Manager.CheckForUpdatesAsync();
             MarkChecked();
-            if (TryParseTag(tag, out var latest) && latest > AppInfo.Version)
+            _pending = info;
+            if (info is null)
             {
-                Available = new UpdateInfo(latest, tag, url);
-                return new CheckResult(true, Available);
+                Available = null;
+                return new CheckResult(true, null);
             }
-            Available = null;
-            return new CheckResult(true, null);
+
+            var tag = "v" + info.TargetFullRelease.Version;
+            TryParseTag(tag, out var latest);
+            Available = new UpdateInfo(latest, tag, $"{AppInfo.ReleasesUrl}/tag/{tag}");
+            return new CheckResult(true, Available);
         }
         catch (Exception ex)
         {
             Log.Write("update check failed: " + ex.Message);
             return new CheckResult(false, null);
+        }
+    }
+
+    /// <summary>Downloads the update (only the changed files when a delta exists), then restarts into the new version.</summary>
+    /// <returns>false if it failed; on success the process exits and this never returns.</returns>
+    public static async Task<bool> InstallAsync(Action<int>? progress = null)
+    {
+        try
+        {
+            if (_pending is null) return false;
+            await Manager.DownloadUpdatesAsync(_pending, progress);
+            App.Tray.Dispose();   // so the tray icon doesn't linger after the process exits
+            Manager.ApplyUpdatesAndRestart(_pending.TargetFullRelease);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Write("update install failed: " + ex.Message);
+            return false;
         }
     }
 

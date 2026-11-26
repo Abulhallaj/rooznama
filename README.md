@@ -106,12 +106,13 @@ Get one of the four files from [Releases](https://github.com/Abulhallaj/rooznama
 | Windows 64-bit | `Rooznama-<version>-portable-x64.zip` | `Rooznama-<version>-setup-x64.exe` |
 | Windows 32-bit | `Rooznama-<version>-portable-x86.zip` | `Rooznama-<version>-setup-x86.exe` |
 
-- **Portable:** extract anywhere and run `Rooznama.exe`. Settings and the log stay in the `data` folder next to the app.
+- **Portable:** extract anywhere and run `Rooznama.exe`. Settings and the log stay in the `data` folder in the extracted `Rooznama` folder.
 - **Installer:** per-user install without admin rights, Start menu entry, clean uninstall.
+- Both update themselves in place (see Updates). Versions older than the first Velopack release have to be replaced once by hand.
 - The icon appears in the system tray (on Windows 11 it may be in the overflow area — drag it to the bar).
 
 ### Updates
-The app periodically (at most once a day) reads the latest GitHub release and shows a notification when a newer version exists. Only the latest release is read; no personal data or usage statistics are sent. It can be turned off in Settings.
+The app periodically (at most once a day) checks the GitHub releases and shows a notification when a newer version exists. In Settings, **Check now** and **Download and install** download only the files that changed (delta packages, via [Velopack](https://velopack.io)) and restart the app. No personal data or usage statistics are sent. The automatic check can be turned off in Settings. A stable version follows stable releases only; a beta version (for example `0.11.0-beta.1`) also follows pre-releases.
 
 ### Support
 Rooznama is free and open source. If it's useful to you, you can [support it here](https://www.coffeete.ir/abulhallaj) (optional).
@@ -134,7 +135,7 @@ Put [Vazirmatn](https://github.com/rastikerdar/vazirmatn) (`Vazirmatn-Regular.tt
 
 ### Data and logs
 - Installed: `%AppData%\Rooznama\settings.json` and `rooznama.log`
-- Portable: the `data` folder next to the app
+- Portable: the `data` folder in the extracted `Rooznama` folder (next to `Update.exe`)
 
 ### Project layout
 ```
@@ -149,7 +150,6 @@ Services/                TrayService (Shell_NotifyIcon), PersianDate, Loc (fa/en
 calendar/                bundled holidays, observances, fixed rules and Hijri data (JSON, copied next to the exe); see calendar/RULES.md
 tests/                   xunit tests for the calendar data service
 TipWindow                right-to-left tray tooltip
-installer/               Inno Setup script (used by CI)
 Assets/                  icons, fonts
 ```
 

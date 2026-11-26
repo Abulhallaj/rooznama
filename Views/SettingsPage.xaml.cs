@@ -96,13 +96,31 @@ public sealed partial class SettingsPage : Page
         else if (r.Update is { } u)
         {
             CheckStatus.Text = string.Format(Loc.T("upd.available"), u.Tag);
-            UpdateLink.Content = Loc.T("upd.download");
-            UpdateLink.NavigateUri = new Uri(u.Url);
+            UpdateLink.Content = Loc.T("upd.install");
+            UpdateLink.IsEnabled = true;
             UpdateLink.Visibility = Visibility.Visible;
         }
         else
         {
             CheckStatus.Text = Loc.T("upd.uptodate");
+        }
+    }
+
+    async void Install_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateLink.IsEnabled = false;
+        CheckBtn.IsEnabled = false;
+        CheckStatus.Text = string.Format(Loc.T("upd.installing"), 0);
+
+        // on success the app restarts and never comes back here
+        var ok = await UpdateService.InstallAsync(p =>
+            DispatcherQueue.TryEnqueue(() => CheckStatus.Text = string.Format(Loc.T("upd.installing"), p)));
+
+        if (!ok)
+        {
+            CheckStatus.Text = Loc.T("upd.installfailed");
+            UpdateLink.IsEnabled = true;
+            CheckBtn.IsEnabled = true;
         }
     }
 }

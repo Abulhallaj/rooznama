@@ -2,7 +2,9 @@ using System.Diagnostics;
 using System.Drawing.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.Win32;
 using Rooznama.Services;
+using Velopack;
 
 namespace Rooznama;
 
@@ -30,6 +32,19 @@ public partial class App : Application
 
     public App()
     {
+        // Velopack install / update / uninstall hooks: must run first; during those runs it does its job and exits.
+        VelopackApp.Build()
+            .OnBeforeUninstallFastCallback(_ =>
+            {
+                try
+                {
+                    using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                    key?.DeleteValue("Rooznama", false);   // remove "Start with Windows" so it doesn't point at a missing exe
+                }
+                catch { }
+            })
+            .Run();
+
         _mutex = new Mutex(true, "Rooznama.SingleInstance", out bool isNew);
         if (!isNew) Environment.Exit(0);
 
