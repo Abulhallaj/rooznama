@@ -9,6 +9,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versio
 - A beta version (for example `0.11.0-beta.1`) also follows pre-releases. A stable version follows stable releases only.
 
 ### Changed
+- **The version is calculated by MinVer from the git tags** (`v0.11.0` -> `0.11.0`; commits after it -> `0.11.1-dev.0.<commits>`), so local and CI builds show exactly which commit they come from (the About page and the log add the short commit hash on pre-release and dev builds). `IsDev` now means "not installed by Velopack". Needs `fetch-depth: 0` in CI (already set).
 - **Installer and portable ZIP are built by Velopack** (`vpk pack`, one channel per architecture: `win-x64`, `win-x86`) instead of Inno Setup. The file names of the four downloads stay the same. Uninstalling removes the "Start with Windows" entry.
 - **Portable mode:** `portable.flag` and the `data` folder now sit in the extracted `Rooznama` folder next to `Update.exe`, one level above the exe, because the `current` folder is replaced on every update. A flag next to the exe (plain publish folder) still works.
 - The release workflow marks tags with a suffix (`v0.11.0-beta.1`) as pre-releases.

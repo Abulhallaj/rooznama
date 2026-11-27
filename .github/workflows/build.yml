@@ -35,21 +35,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # MinVer needs the full history and the tags to calculate the version
 
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
           cache: true
           cache-dependency-path: '**/*.csproj'
-
-      # The app version comes from the git tag (v0.7.0 -> 0.7.0), so it always matches the GitHub release.
-      - name: Compute version
-        shell: pwsh
-        run: |
-          if ($env:GITHUB_REF -like 'refs/tags/v*') { $ver = $env:GITHUB_REF_NAME.Substring(1) }
-          else { $ver = "0.0.0-dev.$env:GITHUB_RUN_NUMBER" }
-          "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "Version: $ver"
 
       - name: Publish (self-contained, win-${{ matrix.arch }})
         shell: pwsh
@@ -58,17 +51,33 @@ jobs:
             --self-contained `
             "-p:WindowsAppSDKSelfContained=true" `
             "-p:PlatformTarget=${{ matrix.arch }}" `
-            "-p:Version=$env:VERSION" `
             "-p:SatelliteResourceLanguages=en%3Bfa" `
             -o "publish/${{ matrix.arch }}"
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+
+      # The version is calculated by MinVer from the git tags (v0.7.0 -> 0.7.0); read it back from the built app.
+      - name: Read version
+        shell: pwsh
+        run: |
+          $info = (Get-Item "publish/${{ matrix.arch }}/Rooznama.dll").VersionInfo.ProductVersion
+          $ver = $info -replace '\+.*$', ''
+          if ($env:GITHUB_REF -like 'refs/tags/v*' -and $ver -ne $env:GITHUB_REF_NAME.Substring(1)) {
+            throw "Tag $env:GITHUB_REF_NAME but the app was built as $ver (incomplete git history?)"
+          }
+          "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "Version: $ver"
 
       # Velopack: one pack per architecture gives the installer, the portable layout and the update packages (full + delta).
       # Every architecture has its own channel (win-x64 / win-x86), so each one updates only from its own feed.
       - name: Pack (Velopack, win-${{ matrix.arch }})
         shell: pwsh
         run: |
-          dotnet tool install -g vpk
+          # vpk must be the same version as the Velopack package the app was built with
+          $vpkVer = (dotnet list Rooznama.csproj package --format json | ConvertFrom-Json).projects[0].frameworks[0].topLevelPackages |
+            Where-Object id -eq 'Velopack' | ForEach-Object resolvedVersion
+          if (-not $vpkVer) { throw "Velopack package version not found" }
+          "Velopack package version: $vpkVer"
+          dotnet tool install -g vpk --version $vpkVer
           $repo = "${{ github.server_url }}/${{ github.repository }}"
           $ch = "win-${{ matrix.arch }}"
           if ($env:GITHUB_REF -like 'refs/tags/v*') {

@@ -19,6 +19,9 @@ public static class UpdateService
 
     public static UpdateInfo? Available { get; private set; }
 
+    /// <summary>true when installed by Velopack (installer or portable ZIP); false for a plain publish / debug build.</summary>
+    public static bool IsInstalled => Manager.IsInstalled;
+
     // A beta (0.11.0-beta.1) also follows pre-releases; a stable version follows stable releases only.
     static UpdateManager Manager => _manager ??=
         new UpdateManager(new GithubSource(AppInfo.RepoUrl, null, AppInfo.VersionText.Contains('-')));
@@ -60,7 +63,7 @@ public static class UpdateService
         try
         {
             // not installed by Velopack (plain publish folder, built from source): nothing to update in place
-            if (!Manager.IsInstalled)
+            if (!IsInstalled)
             {
                 Available = null;
                 return new CheckResult(true, null);
