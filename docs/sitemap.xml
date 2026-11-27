@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://abulhallaj.github.io/rooznama/</loc>
-    <lastmod>2026-11-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <url><loc>https://abulhallaj.github.io/rooznama/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/fa/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/fa/features/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/fa/download/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/fa/changelog/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/fa/faq/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/fa/privacy/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/en/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/en/features/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/en/download/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/en/changelog/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/en/faq/</loc></url>
+  <url><loc>https://abulhallaj.github.io/rooznama/en/privacy/</loc></url>
 </urlset>
